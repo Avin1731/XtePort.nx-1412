@@ -1,15 +1,15 @@
-import { Button } from "@/components/ui/button"
+import { HeroSection } from "@/components/home/hero-section"
+import { TechStack } from "@/components/home/tech-stack"
+import { AboutSection } from "@/components/home/about-section"
+import { CtaSection } from "@/components/home/cta-section" // <--- Import
 
 export default function Home() {
   return (
-    <div className="flex h-screen w-full flex-col items-center justify-center gap-4">
-      <h1 className="text-4xl font-bold tracking-tight">Setup Ready! 🚀</h1>
-      <p className="text-muted-foreground">Next.js 16 + Tailwind v4 + shadcn/ui</p>
-      <div className="flex gap-2">
-        <Button variant="default">Primary Button</Button>
-        <Button variant="secondary">Secondary</Button>
-        <Button variant="outline">Outline</Button>
-      </div>
+    <div className="flex flex-col pb-0">
+      <HeroSection />
+      <TechStack />
+      <AboutSection />
+      <CtaSection /> {/* <--- Pasang di sini */}
     </div>
   )
 }
