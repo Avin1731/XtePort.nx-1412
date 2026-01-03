@@ -1,6 +1,7 @@
 import { HeroSection } from "@/components/home/hero-section"
 import { TechStack } from "@/components/home/tech-stack"
 import { AboutSection } from "@/components/home/about-section"
+import { CtaSection } from "@/components/home/cta-section" // <--- Import
 
 export default function Home() {
   return (
@@ -8,6 +9,7 @@ export default function Home() {
       <HeroSection />
       <TechStack />
       <AboutSection />
+      <CtaSection /> {/* <--- Pasang di sini */}
     </div>
   )
 }
