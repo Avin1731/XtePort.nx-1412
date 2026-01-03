@@ -1,6 +1,6 @@
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { UserNav } from "@/components/layout/user-nav" // Import ini
 
 export function Navbar() {
   return (
@@ -29,9 +29,7 @@ export function Navbar() {
         {/* Right Side (Theme Toggle + Login) */}
         <div className="flex items-center gap-2">
           <ThemeToggle />
-          <Button variant="default" size="sm">
-            Login
-          </Button>
+          <UserNav />
         </div>
       </div>
     </header>
