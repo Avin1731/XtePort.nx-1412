@@ -123,3 +123,18 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* --- THE SCROLLBAR KILLER --- */
+/* Ini akan menghilangkan scrollbar di Chrome, Safari, Edge, Opera */
+::-webkit-scrollbar {
+  width: 0px;
+  height: 0px;
+  background: transparent; 
+  display: none;
+}
+
+/* Ini akan menghilangkan scrollbar di Firefox & IE */
+html, body, div, main, nav, aside {
+  scrollbar-width: none !important; /* Firefox */
+  -ms-overflow-style: none !important; /* IE/Edge */
+}
