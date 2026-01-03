@@ -5,6 +5,8 @@ import {
   text,
   primaryKey,
   integer,
+  serial,
+  varchar
 } from "drizzle-orm/pg-core"
 import type { AdapterAccountType } from "next-auth/adapters"
 
@@ -105,3 +107,10 @@ export const techStack = pgTable("tech_stack", {
   iconName: text("icon_name"), // Nama icon dari Lucide/SimpleIcons
   createdAt: timestamp("created_at").defaultNow(),
 })
+
+export const visitors = pgTable("visitors", {
+  id: serial("id").primaryKey(),
+  ipAddress: varchar("ip_address", { length: 45 }), // IPv6 support
+  userAgent: text("user_agent"),
+  visitedAt: timestamp("visited_at").defaultNow(),
+});
