@@ -1,23 +1,16 @@
-import { AdminSidebar } from "@/components/layout/admin-sidebar"
+import { auth } from "@/auth" 
+import { DashboardClientLayout } from "@/components/layout/dashboard-client-layout"
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const session = await auth()
+
   return (
-    <div className="flex min-h-screen bg-background">
-      {/* Sidebar (Fixed width) */}
-      <aside className="fixed inset-y-0 left-0 z-10 hidden w-64 border-r bg-background md:block">
-        <AdminSidebar />
-      </aside>
-      
-      {/* Main Content Area */}
-      <main className="flex-1 md:pl-64">
-        <div className="container max-w-6xl p-8">
-          {children}
-        </div>
-      </main>
-    </div>
+    <DashboardClientLayout user={session?.user}>
+      {children}
+    </DashboardClientLayout>
   )
 }
