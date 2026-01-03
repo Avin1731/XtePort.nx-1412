@@ -41,7 +41,7 @@ export function AdminSidebar({ user, onClose }: AdminSidebarProps) {
       
       {/* --- TOP CONTROLS --- */}
       <div className="flex items-center justify-between px-6 pt-6">
-        {/* Kiri: Theme Toggle (Border Tebal & Jelas) */}
+        {/* Kiri: Theme Toggle */}
         <Button
             variant="ghost"
             size="icon"
@@ -52,7 +52,7 @@ export function AdminSidebar({ user, onClose }: AdminSidebarProps) {
             <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
         </Button>
 
-        {/* Kanan: Close Button (Border Merah Tebal) */}
+        {/* Kanan: Close Button */}
         <Button 
             variant="ghost" 
             size="icon" 
@@ -81,7 +81,8 @@ export function AdminSidebar({ user, onClose }: AdminSidebarProps) {
       </div>
       
       {/* --- NAVIGATION --- */}
-      <nav className="flex-1 px-6 space-y-2 overflow-y-auto">
+      {/* Tambahan class: [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] */}
+      <nav className="flex-1 px-6 space-y-2 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         <p className="text-xs font-semibold text-muted-foreground pl-2 mb-2 uppercase tracking-widest">Main Menu</p>
         {sidebarItems.map((item) => (
           <Link
@@ -90,7 +91,6 @@ export function AdminSidebar({ user, onClose }: AdminSidebarProps) {
             className={cn(
               "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold transition-all duration-200 group border",
               pathname === item.href 
-                // Active: Background gelap (secondary) + Border Primary tipis
                 ? "bg-secondary border-primary/20 text-primary shadow-sm" 
                 : "border-transparent text-muted-foreground hover:bg-accent hover:text-accent-foreground"
             )}
