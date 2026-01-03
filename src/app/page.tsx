@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 export default function Home() {
   return (
@@ -10,6 +11,7 @@ export default function Home() {
         <Button variant="secondary">Secondary</Button>
         <Button variant="outline">Outline</Button>
       </div>
+      <ThemeToggle />
     </div>
   )
 }
