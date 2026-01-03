@@ -1,11 +1,13 @@
 import { HeroSection } from "@/components/home/hero-section"
+import { TechStack } from "@/components/home/tech-stack"
+import { AboutSection } from "@/components/home/about-section"
 
 export default function Home() {
   return (
-    <div className="flex flex-col gap-20 pb-20">
+    <div className="flex flex-col pb-0">
       <HeroSection />
-      
-      {/* Nanti di sini kita tambah section Highlights (About/Tech Stack) */}
+      <TechStack />
+      <AboutSection />
     </div>
   )
 }
