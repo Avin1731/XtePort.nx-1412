@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { ThemeToggle } from "@/components/theme-toggle"
-import { UserNav } from "@/components/layout/user-nav" // Import ini
+import { UserNav } from "@/components/layout/user-nav"
+import { Home } from "lucide-react" // Import Icon Home
 
 export function Navbar() {
   return (
@@ -13,8 +14,14 @@ export function Navbar() {
           </Link>
         </div>
 
-        {/* Desktop Menu (Hidden on Mobile) */}
+        {/* Desktop Menu */}
         <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
+          {/* 👇 Tambahan Menu Home dengan Icon */}
+          <Link href="/" className="flex items-center gap-1 transition-colors hover:text-primary">
+            <Home className="h-4 w-4" />
+            Home
+          </Link>
+          
           <Link href="/about" className="transition-colors hover:text-primary">
             About
           </Link>

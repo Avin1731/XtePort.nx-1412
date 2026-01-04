@@ -9,7 +9,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { User } from "lucide-react"
+import { User, LayoutDashboard, LogOut } from "lucide-react" // Tambah icon LayoutDashboard
+import Link from "next/link"
 
 export async function UserNav() {
   const session = await auth()
@@ -28,6 +29,9 @@ export async function UserNav() {
       </form>
     )
   }
+
+  // 👇 Cek apakah user adalah admin berdasarkan email di .env
+  const isAdmin = session.user.email === process.env.ADMIN_EMAIL;
 
   return (
     <DropdownMenu>
@@ -49,6 +53,20 @@ export async function UserNav() {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
+        
+        {/* 👇 Menu Dashboard (Hanya Muncul Jika Admin) */}
+        {isAdmin && (
+            <>
+                <DropdownMenuItem asChild>
+                    <Link href="/dashboard" className="flex items-center cursor-pointer">
+                        <LayoutDashboard className="mr-2 h-4 w-4" />
+                        <span>Dashboard Admin</span>
+                    </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+            </>
+        )}
+
         <DropdownMenuItem>
           <form
             action={async () => {
@@ -57,8 +75,9 @@ export async function UserNav() {
             }}
             className="w-full"
           >
-            <button type="submit" className="w-full text-left">
-              Log out
+            <button type="submit" className="w-full text-left flex items-center text-red-500 hover:text-red-600">
+              <LogOut className="mr-2 h-4 w-4" />
+              <span>Log out</span>
             </button>
           </form>
         </DropdownMenuItem>
