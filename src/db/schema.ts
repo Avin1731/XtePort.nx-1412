@@ -6,7 +6,8 @@ import {
   primaryKey,
   integer,
   serial,
-  varchar
+  varchar,
+  uuid
 } from "drizzle-orm/pg-core"
 import type { AdapterAccountType } from "next-auth/adapters"
 
@@ -131,4 +132,13 @@ export const visitors = pgTable("visitors", {
   ipAddress: varchar("ip_address", { length: 45 }),
   userAgent: text("user_agent"),
   visitedAt: timestamp("visited_at").defaultNow(),
+});
+
+// --- Table: Messages (from Chat Widget) ---
+export const messages = pgTable("messages", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: text("user_id"),
+  content: text("content").notNull(),
+  isRead: boolean("is_read").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
 });

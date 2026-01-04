@@ -12,7 +12,8 @@ import {
   LogOut,
   X,
   Moon,
-  Sun
+  Sun,
+  Mail // <--- Import Icon Mail
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -34,6 +35,7 @@ export function AdminSidebar({ user, onClose }: AdminSidebarProps) {
     { title: "Projects", href: "/dashboard/projects", icon: FolderOpen },
     { title: "Tech Stack", href: "/dashboard/tech", icon: Layers },
     { title: "Guestbook", href: "/dashboard/guestbook", icon: MessageSquare },
+    { title: "Inbox", href: "/dashboard/messages", icon: Mail }, // <--- Menu Baru: INBOX
   ]
 
   return (
@@ -81,7 +83,6 @@ export function AdminSidebar({ user, onClose }: AdminSidebarProps) {
       </div>
       
       {/* --- NAVIGATION --- */}
-      {/* Tambahan class: [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] */}
       <nav className="flex-1 px-6 space-y-2 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         <p className="text-xs font-semibold text-muted-foreground pl-2 mb-2 uppercase tracking-widest">Main Menu</p>
         {sidebarItems.map((item) => (
