@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { AdminSidebar } from "@/components/layout/admin-sidebar"
+import { AdminSidebar } from "@/components/layout/admin-sidebar" 
 import { Button } from "@/components/ui/button"
 import { Menu } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -12,22 +12,27 @@ interface UserProps {
   image?: string | null
 }
 
-export function DashboardClientLayout({
-  children,
-  user
-}: {
+// 👇 1. UPDATE INTERFACE
+interface DashboardClientLayoutProps {
   children: React.ReactNode
   user: UserProps | undefined
-}) {
+  counts?: { messages: number; guestbook: number }
+}
+
+export function DashboardClientLayout({
+  children,
+  user,
+  counts = { messages: 0, guestbook: 0 } // 👇 2. Default value object
+}: DashboardClientLayoutProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
 
   return (
     <div className="relative flex w-full h-screen bg-background overflow-hidden">
       
-      {/* AREA KONTEN: Tambahkan class 'no-scrollbar' */}
+      {/* AREA KONTEN */}
       <div 
         className={cn(
-            "flex-1 flex flex-col h-full overflow-y-auto transition-all duration-300 ease-in-out no-scrollbar", // <--- Ganti di sini
+            "flex-1 flex flex-col h-full overflow-y-auto transition-all duration-300 ease-in-out no-scrollbar",
             isSidebarOpen ? "md:mr-[300px] lg:mr-[25%]" : "mr-0"
         )}
       >
@@ -59,6 +64,7 @@ export function DashboardClientLayout({
         </main>
       </div>
 
+      {/* SIDEBAR WRAPPER */}
       <aside 
         className={cn(
           "fixed inset-y-0 right-0 z-40 bg-card border-l shadow-2xl transition-transform duration-300 ease-in-out",
@@ -66,7 +72,12 @@ export function DashboardClientLayout({
           isSidebarOpen ? "translate-x-0" : "translate-x-full"
         )}
       >
-        <AdminSidebar user={user} onClose={() => setIsSidebarOpen(false)} />
+        {/* 👇 3. OPER COUNTS KE SIDEBAR */}
+        <AdminSidebar 
+            user={user} 
+            counts={counts} 
+            onClose={() => setIsSidebarOpen(false)} 
+        />
       </aside>
 
       {isSidebarOpen && (
