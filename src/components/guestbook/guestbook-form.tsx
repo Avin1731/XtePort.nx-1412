@@ -4,9 +4,10 @@ import { createGuestbookEntry } from "@/actions/guestbook";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { signIn } from "next-auth/react";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { Send, LogIn, Loader2 } from "lucide-react";
 import { useFormStatus } from "react-dom";
+import { cn } from "@/lib/utils";
 
 interface GuestbookFormProps {
   user: {
@@ -15,11 +16,13 @@ interface GuestbookFormProps {
   } | undefined;
 }
 
+const TOPICS = ["General", "Tech Talk", "Feedback", "Bug Report", "Hire Me"];
+
 function SubmitButton() {
   const { pending } = useFormStatus();
 
   return (
-    <Button type="submit" size="icon" disabled={pending} className="shrink-0">
+    <Button type="submit" size="icon" disabled={pending} className="shrink-0 h-10 w-10">
       {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
     </Button>
   );
@@ -27,6 +30,15 @@ function SubmitButton() {
 
 export function GuestbookForm({ user }: GuestbookFormProps) {
   const formRef = useRef<HTMLFormElement>(null);
+  const [selectedTopic, setSelectedTopic] = useState("General"); // Default Topic
+
+  // Function wrapper untuk handle form submission agar bisa tambah topic
+  const handleSubmit = async (formData: FormData) => {
+    formData.append("topic", selectedTopic); // Tambahkan topic ke formData
+    await createGuestbookEntry(formData);
+    formRef.current?.reset();
+    setSelectedTopic("General"); // Reset topic ke default
+  };
 
   return (
     <div className="bg-card/50 border rounded-xl p-6 shadow-sm mb-10 backdrop-blur-sm">
@@ -44,20 +56,38 @@ export function GuestbookForm({ user }: GuestbookFormProps) {
         // --- SUDAH LOGIN ---
         <form
           ref={formRef}
-          action={async (formData) => {
-            await createGuestbookEntry(formData);
-            formRef.current?.reset();
-          }}
-          className="flex gap-3"
+          action={handleSubmit}
+          className="space-y-3"
         >
-          <Input
-            name="message"
-            placeholder="Type your message here..."
-            required
-            autoComplete="off"
-            className="flex-1 bg-background"
-          />
-          <SubmitButton />
+          {/* Topic Selection Pills */}
+          <div className="flex flex-wrap gap-2 mb-2">
+            {TOPICS.map((topic) => (
+                <button
+                    key={topic}
+                    type="button"
+                    onClick={() => setSelectedTopic(topic)}
+                    className={cn(
+                        "text-[10px] font-bold px-2.5 py-1 rounded-full border transition-all",
+                        selectedTopic === topic
+                            ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                            : "bg-background text-muted-foreground border-border hover:border-primary/50"
+                    )}
+                >
+                    {topic}
+                </button>
+            ))}
+          </div>
+
+          <div className="flex gap-3">
+              <Input
+                name="message"
+                placeholder={`Type your message in #${selectedTopic}...`}
+                required
+                autoComplete="off"
+                className="flex-1 bg-background h-10"
+              />
+              <SubmitButton />
+          </div>
         </form>
       ) : (
         // --- BELUM LOGIN ---

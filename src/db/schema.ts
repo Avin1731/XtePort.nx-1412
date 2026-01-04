@@ -89,6 +89,8 @@ export const guestbook = pgTable("guestbook", {
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   message: text("message").notNull(),
+  // 👇 UPDATE: Tambahkan kolom topic
+  topic: text("topic").default("General").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 })
 
