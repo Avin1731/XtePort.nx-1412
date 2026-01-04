@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Footer } from "@/components/layout/footer";
 import VisitorTracker from "@/components/analytics/VisitorTracker";
+import { ChatWidget } from "@/components/chat/chat-widget";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,7 +29,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen`}>
-        <VisitorTracker /> {/* Tambahkan baris ini */}
+        <VisitorTracker />
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -36,6 +37,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <main className="flex-1">{children}</main>
+          <ChatWidget />
           <Footer />
         </ThemeProvider>
       </body>
