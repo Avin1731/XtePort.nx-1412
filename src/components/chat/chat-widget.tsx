@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { MessageCircle, X, Send, Bot, Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { sendMessage } from "@/actions/message"; // <--- Import Action
 
 // --- TYPE & DATA ---
 type Message = {
@@ -26,6 +27,7 @@ const FAQ_DATA = [
 export function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
+  const [inputValue, setInputValue] = useState(""); // <--- State Input
   const [messages, setMessages] = useState<Message[]>([
     { id: 'init', text: "👋 Hi there! I'm A-1412's AI assistant. How can I help you today?", sender: 'bot' }
   ]);
@@ -33,12 +35,14 @@ export function ChatWidget() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const chipsContainerRef = useRef<HTMLDivElement>(null);
 
+  // Auto scroll ke bawah
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages, isTyping, isOpen]);
 
+  // Handle Klik Chip Pertanyaan
   const handleQuestionClick = async (q: string, a: string) => {
     const userMsg: Message = { id: crypto.randomUUID(), text: q, sender: 'user' };
     setMessages((prev) => [...prev, userMsg]);
@@ -51,12 +55,54 @@ export function ChatWidget() {
     setIsTyping(false);
   };
 
+  // --- HANDLE KIRIM PESAN MANUAL ---
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!inputValue.trim()) return;
+
+    // 1. Tambah pesan User ke UI (Optimistic)
+    const userMsg: Message = { id: crypto.randomUUID(), text: inputValue, sender: 'user' };
+    setMessages((prev) => [...prev, userMsg]);
+    setInputValue(""); // Clear input
+    setIsTyping(true);
+
+    // 2. Kirim ke Backend (Server Action)
+    try {
+        const result = await sendMessage(userMsg.text);
+
+        // 3. Respon Bot berdasarkan hasil
+        await new Promise((resolve) => setTimeout(resolve, 1000)); // Delay alami
+
+        if (result.success) {
+            const botMsg: Message = { 
+                id: crypto.randomUUID(), 
+                text: "Thanks! I've received your message. I'll get back to you soon.", 
+                sender: 'bot' 
+            };
+            setMessages((prev) => [...prev, botMsg]);
+        } else {
+            const errorMsg: Message = { 
+                id: crypto.randomUUID(), 
+                text: "Oops, something went wrong. Please try again later.", 
+                sender: 'bot' 
+            };
+            setMessages((prev) => [...prev, errorMsg]);
+        }
+    } catch (error) {
+        console.error(error);
+        const errorMsg: Message = { id: crypto.randomUUID(), text: "Connection error.", sender: 'bot' };
+        setMessages((prev) => [...prev, errorMsg]);
+    }
+    
+    setIsTyping(false);
+  };
+
   // --- LOGIC SCROLL HALUS ---
   const scrollChips = (direction: 'left' | 'right') => {
     if (chipsContainerRef.current) {
-      // scrollBy dengan behavior smooth agar "mengalir"
       chipsContainerRef.current.scrollBy({
-        left: direction === 'left' ? -150 : 150, // Jarak dikurangi biar ga lompat jauh
+        left: direction === 'left' ? -150 : 150,
         behavior: 'smooth'
       });
     }
@@ -150,8 +196,6 @@ export function ChatWidget() {
                  
                  {/* Chips Container with Arrows */}
                  <div className="relative flex items-center w-full mb-3 group">
-                    
-                    {/* BUTTON KIRI (Hanya muncul jika hover container/group biar bersih) */}
                     <button 
                         onClick={() => scrollChips('left')}
                         className="absolute left-0 z-10 p-1.5 rounded-full bg-background/90 shadow-md border border-border hover:bg-primary hover:text-primary-foreground transition-all active:scale-95 disabled:opacity-0"
@@ -159,7 +203,6 @@ export function ChatWidget() {
                         <ChevronLeft className="h-3 w-3" />
                     </button>
 
-                    {/* SCROLL AREA dengan MASKING GRADIENT */}
                     <div 
                         ref={chipsContainerRef}
                         className="flex gap-2 overflow-x-auto w-full px-8 no-scrollbar"
@@ -183,7 +226,6 @@ export function ChatWidget() {
                         ))}
                     </div>
 
-                    {/* BUTTON KANAN */}
                     <button 
                         onClick={() => scrollChips('right')}
                         className="absolute right-0 z-10 p-1.5 rounded-full bg-background/90 shadow-md border border-border hover:bg-primary hover:text-primary-foreground transition-all active:scale-95"
@@ -192,17 +234,23 @@ export function ChatWidget() {
                     </button>
                  </div>
                 
-                {/* Input Field */}
-                <form className="relative flex items-center gap-2" onSubmit={(e) => e.preventDefault()}>
+                {/* Input Field dengan Handler Submit */}
+                <form 
+                    className="relative flex items-center gap-2" 
+                    onSubmit={handleSendMessage} // <--- Submit Handler
+                >
                   <Input 
                     placeholder="Type a message..." 
                     className="flex-1 h-11 rounded-full bg-secondary/50 border-transparent focus:bg-background focus:border-primary/30 transition-all pl-4 pr-10 text-sm" 
-                    disabled={isTyping} 
+                    disabled={isTyping}
+                    value={inputValue} // <--- Value Binding
+                    onChange={(e) => setInputValue(e.target.value)} // <--- On Change
                   />
                   <Button 
                     size="icon" 
                     type="submit" 
-                    disabled 
+                    // Disable jika sedang ngetik atau input kosong
+                    disabled={isTyping || !inputValue.trim()} 
                     className="absolute right-1.5 top-1.5 h-8 w-8 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground transition-all shadow-md"
                   >
                     <Send className="h-3.5 w-3.5" />
