@@ -28,19 +28,20 @@ Goal: Otak backend, koneksi database, sistem login, dan CMS Schema.
 - [x] **Auth:** Setup Auth.js (v5) dengan Google OAuth.
 - [x] **Migrations:** Push schema database pertama & Login UI.
 
-### 🛡️ Phase 3: Dashboard & Content Control (Next)
+### 🛡️ Phase 3: Dashboard & Content Control (Completed)
 Goal: Dashboard admin, CMS Portfolio, dan Tracking Pengunjung.
-- [ ] **Role Setup:** Set role 'admin' manual di database (Drizzle Studio).
-- [ ] **Middleware:** Proteksi route `/dashboard` (Hanya email owner yang boleh akses).
-- [ ] **Admin Layout:** Buat Sidebar dan Layout khusus Dashboard admin.
-- [ ] **Visitor Tracking:** Server action untuk catat IP dan User Agent saat page load.
-- [ ] **Dashboard Stats:** UI kartu statistik (Total Visitors, Total Projects) & Tabel Visitor Log.
-- [ ] **CMS Project:** CRUD tabel `projects` (Tambah/Edit portfolio dari UI).
-- [ ] **CMS Tech Stack:** CRUD tabel `tech_stack` (Manage skill icon).
+- [x] **Role Setup:** Set role 'admin' manual di database (Drizzle Studio).
+- [x] **Middleware:** Proteksi route `/dashboard` (Hanya email owner yang boleh akses).
+- [x] **Admin Layout:** Buat Sidebar dan Layout khusus Dashboard admin (No Scrollbars).
+- [x] **Visitor Tracking:** Server action untuk catat IP dan User Agent saat page load.
+- [x] **Dashboard Stats:** UI kartu statistik (Total Visitors, Total Projects) & Tabel Visitor Log.
+- [x] **CMS Project:** CRUD tabel `projects` (Tambah/Edit portfolio dari UI).
+- [x] **CMS Tech Stack:** CRUD tabel `tech_stack` (Manage skill icon).
 
-### 💬 Phase 4: Interactive & Community
+### 💬 Phase 4: Interactive & Community (In Progress)
 Goal: Chatbot widget, Guestbook, dan Forum Diskusi.
 - [ ] **Guestbook:** Fitur komentar publik sederhana (Buku Tamu) dengan auth.
+- [ ] **Admin Guestbook:** Moderasi pesan masuk (Hapus pesan spam/kasar).
 - [ ] **Chat Widget UI:** Floating Action Button & Container Chat Pop-up.
 - [ ] **FAQ Logic:** Logic chatbot sederhana (pilih pertanyaan -> muncul jawaban).
 - [ ] **Forum Sidebar:** UI Sidebar kanan untuk diskusi lebih dalam.
@@ -65,15 +66,18 @@ Goal: Finishing touches, SEO, dan performa.
 * **Framework:** Next.js 16 (App Router)
 * **Language:** TypeScript
 * **Styling:** Tailwind CSS v4
-* **UI Library:** shadcn/ui
+* **UI Library:** shadcn/ui, Lucide React
 * **Animation:** Framer Motion
 * **Database:** PostgreSQL (Neon) + Drizzle ORM
 * **Auth:** Auth.js (NextAuth v5)
+* **Utils:** Date-fns, Recharts (Stats)
 
 ## 📂 Folder Structure
 * `src/app` - Pages & Routes (App Router).
+* `src/actions` - Server Actions (Backend Logic).
 * `src/components/ui` - Shadcn atomic components.
 * `src/components/layout` - Navbar, Footer, Sidebar.
+* `src/components/dashboard` - Admin specific components (Forms, Tables).
 * `src/components/home` - Landing page sections.
 * `src/components/animation` - Reusable motion wrappers.
 * `src/lib` - Utilities, DB config & Auth setup.

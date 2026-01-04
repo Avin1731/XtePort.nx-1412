@@ -24,6 +24,9 @@ export function Navbar() {
           <Link href="/projects" className="transition-colors hover:text-primary">
             Projects
           </Link>
+          <Link href="/guestbook" className="transition-colors hover:text-primary">
+            Guestbook
+          </Link>
         </nav>
 
         {/* Right Side (Theme Toggle + Login) */}
