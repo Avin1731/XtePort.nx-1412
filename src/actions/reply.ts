@@ -6,19 +6,20 @@ import { messages, users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { auth } from "@/auth";
 
-// Inisialisasi Resend dengan API Key
-const resend = new Resend(process.env.RESEND_API_KEY);
-
+// --- SEND REPLY EMAIL TO USER ---
 export async function sendReply(messageId: string, replyContent: string) {
   const session = await auth();
 
-  // 1. Security Check: Pastikan yang akses adalah Admin
+  // 1. Security Check
   if (session?.user?.email !== process.env.ADMIN_EMAIL) {
     return { success: false, error: "Unauthorized access" };
   }
 
+  // Instance baru dibuat hanya saat fungsi dipanggil, bukan saat build.
+  const resend = new Resend(process.env.RESEND_API_KEY);
+
   try {
-    // 2. Ambil detail pesan & email pengirim dari database
+    // 2. Ambil detail pesan
     const result = await db
       .select({
         userName: users.name,
@@ -32,14 +33,11 @@ export async function sendReply(messageId: string, replyContent: string) {
 
     const data = result[0];
 
-    // Jika user tidak ditemukan atau tidak punya email (Guest tanpa login)
     if (!data || !data.userEmail) {
       return { success: false, error: "User email not found (Guest?)" };
     }
 
-    // 3. Kirim Email via Resend
-    // PENTING: Jika belum verifikasi domain sendiri, 'from' WAJIB 'onboarding@resend.dev'
-    // dan 'to' hanya bisa ke email yang kamu pakai untuk daftar Resend (Testing Mode).
+    // 3. Kirim Email
     await resend.emails.send({
       from: "Admin A-1412 <onboarding@resend.dev>", 
       to: data.userEmail,
