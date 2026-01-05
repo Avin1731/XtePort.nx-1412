@@ -32,12 +32,11 @@ export function GuestbookForm({ user }: GuestbookFormProps) {
   const formRef = useRef<HTMLFormElement>(null);
   const [selectedTopic, setSelectedTopic] = useState("General"); // Default Topic
 
-  // Function wrapper untuk handle form submission agar bisa tambah topic
   const handleSubmit = async (formData: FormData) => {
-    formData.append("topic", selectedTopic); // Tambahkan topic ke formData
+    formData.append("topic", selectedTopic); 
     await createGuestbookEntry(formData);
     formRef.current?.reset();
-    setSelectedTopic("General"); // Reset topic ke default
+    setSelectedTopic("General");
   };
 
   return (

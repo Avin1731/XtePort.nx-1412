@@ -1,11 +1,10 @@
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
-import { guestbook, users } from "@/db/schema";
+import { guestbook } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
-import { GuestbookForm } from "@/components/guestbook/guestbook-form"; 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { GuestbookForm } from "@/components/guestbook/guestbook-form";
+import { GuestbookEntry } from "@/components/guestbook/guestbook-entry"; // 👈 Import Component Baru
 import { Badge } from "@/components/ui/badge";
-import { formatDistance } from "date-fns";
 import { Hash, Filter, MessageSquare, Info } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -16,58 +15,54 @@ export const metadata: Metadata = {
   description: "Join the discussion forum.",
 };
 
+// --- CONSTANTS & HELPERS ---
 const TOPICS = [
-    { name: "All Topics", slug: undefined },
-    { name: "General", slug: "General" },
-    { name: "Tech Talk", slug: "Tech Talk" },
-    { name: "Feedback", slug: "Feedback" },
-    { name: "Bug Report", slug: "Bug Report" },
-    { name: "Hire Me", slug: "Hire Me" },
+  { name: "All Topics", slug: undefined },
+  { name: "General", slug: "General" },
+  { name: "Tech Talk", slug: "Tech Talk" },
+  { name: "Feedback", slug: "Feedback" },
+  { name: "Bug Report", slug: "Bug Report" },
+  { name: "Hire Me", slug: "Hire Me" },
 ];
 
-const getTopicColor = (topic: string) => {
-    switch (topic) {
-        case "Bug Report": return "bg-red-500/10 text-red-500 hover:bg-red-500/20 border-red-500/20";
-        case "Hire Me": return "bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 border-blue-500/20";
-        case "Tech Talk": return "bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20 border-yellow-500/20";
-        case "Feedback": return "bg-purple-500/10 text-purple-500 hover:bg-purple-500/20 border-purple-500/20";
-        default: return "bg-secondary text-secondary-foreground hover:bg-secondary/80";
-    }
+// Kita export function ini biar bisa dipakai di component lain kalau perlu
+export const getTopicColor = (topic: string) => {
+  switch (topic) {
+    case "Bug Report": return "bg-red-500/10 text-red-500 hover:bg-red-500/20 border-red-500/20";
+    case "Hire Me": return "bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 border-blue-500/20";
+    case "Tech Talk": return "bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20 border-yellow-500/20";
+    case "Feedback": return "bg-purple-500/10 text-purple-500 hover:bg-purple-500/20 border-purple-500/20";
+    default: return "bg-secondary text-secondary-foreground hover:bg-secondary/80";
+  }
 };
 
-// 👇 1. UPDATE TYPE DEFINITION (Next.js 15+ Requirement)
+// Agar data selalu fresh saat ada like/reply baru
+export const dynamic = "force-dynamic";
+
 type Props = {
   searchParams: Promise<{ topic?: string }>;
 };
 
 export default async function GuestbookPage({ searchParams }: Props) {
   const session = await auth();
-  
-  // 👇 2. MUST AWAIT IN NEXT.JS 15+
-  const params = await searchParams; 
+  const params = await searchParams;
   const topicFilter = params.topic;
 
-  // 3. Query Database
-  const allEntries = await db
-    .select({
-      id: guestbook.id,
-      message: guestbook.message,
-      topic: guestbook.topic,
-      createdAt: guestbook.createdAt,
-      user: {
-        name: users.name,
-        image: users.image,
-        email: users.email,
+  // 🔥 1. FETCH DATA WITH RELATIONS (User + Likes + Replies)
+  const entries = await db.query.guestbook.findMany({
+    where: topicFilter ? eq(guestbook.topic, topicFilter) : undefined,
+    orderBy: [desc(guestbook.createdAt)],
+    with: {
+      user: true,        // Ambil data pengirim
+      likes: true,       // Ambil data likes (untuk hitung jumlah & cek status liked)
+      replies: {         // Ambil data balasan
+        with: {
+          author: true,  // ...beserta penulis balasannya
+        },
+        orderBy: (replies, { asc }) => [asc(replies.createdAt)], // Urutkan balasan lama -> baru
       },
-    })
-    .from(guestbook)
-    .leftJoin(users, eq(guestbook.userId, users.id))
-    .orderBy(desc(guestbook.createdAt));
-
-  // 4. Filtering Logic
-  const entries = topicFilter 
-    ? allEntries.filter(entry => entry.topic === topicFilter)
-    : allEntries;
+    },
+  });
 
   return (
     <div className="container mx-auto max-w-6xl py-24 px-6 min-h-screen">
@@ -85,8 +80,9 @@ export default async function GuestbookPage({ searchParams }: Props) {
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-10">
         
-        {/* KIRI: CONTENT */}
+        {/* KIRI: CONTENT MAIN */}
         <div className="lg:col-span-3 space-y-8">
+            {/* Form Input Pesan Baru */}
             <GuestbookForm user={session?.user} />
 
             <div className="space-y-6">
@@ -100,6 +96,7 @@ export default async function GuestbookPage({ searchParams }: Props) {
                     </Badge>
                 </div>
 
+                {/* List Entries */}
                 {entries.length === 0 ? (
                     <div className="text-center py-16 bg-secondary/20 rounded-2xl border border-dashed border-border/60">
                         <div className="bg-background w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm">
@@ -109,38 +106,21 @@ export default async function GuestbookPage({ searchParams }: Props) {
                         <p className="text-xs text-muted-foreground mt-1">Be the first to start the conversation!</p>
                     </div>
                 ) : (
-                    entries.map((entry) => (
-                        <div key={entry.id} className="group flex gap-4 p-5 rounded-2xl bg-card border border-border/40 hover:border-primary/20 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 animate-in fade-in slide-in-from-bottom-2">
-                            <Avatar className="h-11 w-11 border-2 border-background shadow-sm shrink-0">
-                                <AvatarImage src={entry.user?.image || ""} />
-                                <AvatarFallback className="bg-primary/10 text-primary font-bold">
-                                    {entry.user?.name?.charAt(0) || "U"}
-                                </AvatarFallback>
-                            </Avatar>
-                            
-                            <div className="flex-1 space-y-2">
-                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                                    <div className="flex items-center gap-2">
-                                        <span className="font-bold text-sm text-foreground">{entry.user?.name}</span>
-                                        <Badge variant="outline" className={cn("text-[10px] px-2 py-0.5 h-auto font-semibold uppercase tracking-wider", getTopicColor(entry.topic))}>
-                                            {entry.topic}
-                                        </Badge>
-                                    </div>
-                                    <span className="text-xs text-muted-foreground font-medium">
-                                        {formatDistance(new Date(entry.createdAt!), new Date(), { addSuffix: true })}
-                                    </span>
-                                </div>
-                                <p className="text-sm leading-relaxed text-foreground/90 whitespace-pre-wrap">
-                                    {entry.message}
-                                </p>
-                            </div>
-                        </div>
-                    ))
+                    <div className="grid gap-6">
+                        {entries.map((entry) => (
+                           // 👇 MENGGUNAKAN COMPONENT BARU
+                           <GuestbookEntry 
+                              key={entry.id} 
+                              entry={entry} 
+                              currentUserId={session?.user?.id}
+                           />
+                        ))}
+                    </div>
                 )}
             </div>
         </div>
 
-        {/* KANAN: SIDEBAR */}
+        {/* KANAN: SIDEBAR (Sticky) */}
         <div className="lg:col-span-1">
             <div className="sticky top-24 space-y-6">
                 <div className="bg-card border border-border/50 rounded-2xl p-5 shadow-sm overflow-hidden">
