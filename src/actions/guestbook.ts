@@ -10,8 +10,7 @@ import { revalidatePath } from "next/cache";
 export async function deleteGuestbookEntry(id: string) {
   const session = await auth();
   
-  // FIX: Hapus check 'role' agar tidak error TS.
-  // Cukup validasi berdasarkan EMAIL ADMIN yang ada di .env
+  // Validasi berdasarkan EMAIL ADMIN yang ada di .env
   if (session?.user?.email !== process.env.ADMIN_EMAIL) {
     throw new Error("Unauthorized Access: Admin only.");
   }
@@ -30,6 +29,7 @@ export async function createGuestbookEntry(formData: FormData) {
   }
 
   const message = formData.get("message") as string;
+  const topic = formData.get("topic") as string; // 👇 Ambil topic dari form
 
   // Validasi simpel
   if (!message || message.trim().length === 0) return;
@@ -37,6 +37,7 @@ export async function createGuestbookEntry(formData: FormData) {
   await db.insert(guestbook).values({
     userId: session.user.id,
     message: message.slice(0, 500), // Limit 500 karakter
+    topic: topic || "General", // 👇 Simpan topic (Default: General jika kosong)
   });
 
   revalidatePath("/guestbook");

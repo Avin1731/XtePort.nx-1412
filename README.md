@@ -38,20 +38,21 @@ Goal: Dashboard admin, CMS Portfolio, dan Tracking Pengunjung.
 - [x] **CMS Project:** CRUD tabel `projects` (Tambah/Edit portfolio dari UI).
 - [x] **CMS Tech Stack:** CRUD tabel `tech_stack` (Manage skill icon).
 
-### 💬 Phase 4: Interactive & Community (In Progress)
-Goal: Chatbot widget, Guestbook, dan Forum Diskusi.
-- [ ] **Guestbook:** Fitur komentar publik sederhana (Buku Tamu) dengan auth.
-- [ ] **Admin Guestbook:** Moderasi pesan masuk (Hapus pesan spam/kasar).
-- [ ] **Chat Widget UI:** Floating Action Button & Container Chat Pop-up.
-- [ ] **FAQ Logic:** Logic chatbot sederhana (pilih pertanyaan -> muncul jawaban).
-- [ ] **Forum Sidebar:** UI Sidebar kanan untuk diskusi lebih dalam.
-- [ ] **Message System:** Server Action untuk User post pesan & Admin baca.
+### 💬 Phase 4: Interactive & Community (Completed)
+Goal: Chatbot widget, Guestbook, dan Message System.
+- [x] **Guestbook:** Fitur komentar publik sederhana (Buku Tamu) dengan auth.
+- [x] **Admin Guestbook:** Moderasi pesan masuk (Hapus pesan spam/kasar).
+- [x] **Chat Widget UI:** Floating Action Button, Animations, & Glassmorphism UI.
+- [x] **FAQ Logic:** Logic chatbot sederhana (pilih pertanyaan -> muncul jawaban).
+- [x] **Message System:** Server Action untuk User post pesan privat ke database.
+- [x] **Admin Inbox:** Dashboard UI untuk membaca dan menghapus pesan masuk.
 
-### 🔔 Phase 5: Notification System
-Goal: Notifikasi real-time dan email responder.
-- [ ] **Admin Notif:** Indicator (badge) saat ada pesan/guestbook baru.
+### 🔔 Phase 5: Advanced Features & Engagement (In Progress)
+Goal: Upgrade Guestbook jadi Forum (Sidebar), Notifikasi, dan Email.
+- [ ] **Guestbook V2 (Forum Logic):** Implementasi Topic Tags, Filtering, dan Sidebar Kanan.
+- [ ] **Admin Notif:** Indicator (badge merah) saat ada pesan/guestbook baru.
 - [ ] **Email Setup:** Setup Resend SDK & Domain verification.
-- [ ] **Reply System:** Fitur reply dari dashboard admin.
+- [ ] **Reply System:** Fitur reply pesan dari dashboard admin.
 - [ ] **Email Trigger:** Otomatis kirim email notifikasi ke user saat admin membalas.
 
 ### ✨ Phase 6: Polish & SEO
@@ -86,5 +87,42 @@ Goal: Finishing touches, SEO, dan performa.
 ## 🚀 Getting Started
 
 ### 1. Install Dependencies
+
 ```bash
 pnpm install
+```
+
+### 2. Setup Environment Variables
+Create a .env file in the root directory and add the following keys:
+
+```bash
+# Database (Neon PostgreSQL)
+DATABASE_URL="postgresql://neondb_owner:..."
+
+# Auth Secret (Generate random string for encryption)
+AUTH_SECRET="your_secret_key_random_string"
+
+# Google OAuth (For Login)
+AUTH_GOOGLE_ID="your_google_client_id"
+AUTH_GOOGLE_SECRET="your_google_client_secret"
+
+# Admin Access
+ADMIN_EMAIL="your_email@gmail.com"
+
+# Email Service (Resend)
+RESEND_API_KEY="re_123..."
+```
+
+### 3. Database Migration
+Push the schema to your Neon database to create tables:
+
+```bash
+npx drizzle-kit push
+```
+### 4. Run Development Server
+Start the local server:
+
+```bash
+pnpm dev
+Open http://localhost:3000 with your browser to see the result.
+```
