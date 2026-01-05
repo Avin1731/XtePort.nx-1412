@@ -6,27 +6,22 @@ import {
   guestbook,
   guestbookLikes,
   guestbookReplies,
+  guestbookReplyLikes, // 👈 Pastikan tabel ini di-import
   notifications,
 } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 /**
- * TOGGLE LIKE
- * Check if user already liked the post.
- * - If yes: Delete like (Unlike).
- * - If no: Insert like & Create notification.
+ * TOGGLE LIKE POSTINGAN UTAMA
  */
 export async function toggleGuestbookLike(guestbookId: string) {
   const session = await auth();
-  if (!session?.user?.id) {
-    return { error: "Unauthorized" };
-  }
+  if (!session?.user?.id) return { error: "Unauthorized" };
 
   const userId = session.user.id;
 
   try {
-    // 1. Cek apakah sudah like sebelumnya
     const existingLike = await db.query.guestbookLikes.findFirst({
       where: and(
         eq(guestbookLikes.guestbookId, guestbookId),
@@ -35,7 +30,6 @@ export async function toggleGuestbookLike(guestbookId: string) {
     });
 
     if (existingLike) {
-      // --- UNLIKE ---
       await db
         .delete(guestbookLikes)
         .where(
@@ -45,23 +39,17 @@ export async function toggleGuestbookLike(guestbookId: string) {
           )
         );
     } else {
-      // --- LIKE ---
-      await db.insert(guestbookLikes).values({
-        guestbookId,
-        userId,
-      });
+      await db.insert(guestbookLikes).values({ guestbookId, userId });
 
-      // 2. Ambil data pemilik postingan asli untuk kirim notif
       const post = await db.query.guestbook.findFirst({
         where: eq(guestbook.id, guestbookId),
         columns: { userId: true },
       });
 
-      // 3. Buat Notifikasi (Hanya jika yang nge-like BUKAN pemilik postingan)
       if (post && post.userId !== userId) {
         await db.insert(notifications).values({
-          userId: post.userId, // Penerima (Pemilik Post)
-          triggerUserId: userId, // Pelaku (Yang nge-like)
+          userId: post.userId,
+          triggerUserId: userId,
           type: "LIKE",
           referenceId: guestbookId,
           isRead: false,
@@ -79,39 +67,31 @@ export async function toggleGuestbookLike(guestbookId: string) {
 
 /**
  * SUBMIT REPLY
- * Save reply to database & trigger notification.
  */
 export async function submitReply(guestbookId: string, content: string) {
   const session = await auth();
-  if (!session?.user?.id) {
-    return { error: "Unauthorized" };
-  }
+  if (!session?.user?.id) return { error: "Unauthorized" };
 
   const userId = session.user.id;
 
-  if (!content.trim()) {
-    return { error: "Content cannot be empty" };
-  }
+  if (!content.trim()) return { error: "Content cannot be empty" };
 
   try {
-    // 1. Simpan Balasan
     await db.insert(guestbookReplies).values({
       guestbookId,
       userId,
       content: content.trim(),
     });
 
-    // 2. Ambil data pemilik postingan asli
     const post = await db.query.guestbook.findFirst({
       where: eq(guestbook.id, guestbookId),
       columns: { userId: true },
     });
 
-    // 3. Buat Notifikasi (Jika membalas orang lain)
     if (post && post.userId !== userId) {
       await db.insert(notifications).values({
-        userId: post.userId, // Penerima
-        triggerUserId: userId, // Pelaku
+        userId: post.userId,
+        triggerUserId: userId,
         type: "REPLY",
         referenceId: guestbookId,
         isRead: false,
@@ -123,5 +103,43 @@ export async function submitReply(guestbookId: string, content: string) {
   } catch (error) {
     console.error("Error submitting reply:", error);
     return { error: "Failed to reply" };
+  }
+}
+
+/**
+ * TOGGLE LIKE BALASAN (NEW)
+ */
+export async function toggleReplyLike(replyId: string) {
+  const session = await auth();
+  if (!session?.user?.id) return { error: "Unauthorized" };
+
+  const userId = session.user.id;
+
+  try {
+    const existingLike = await db.query.guestbookReplyLikes.findFirst({
+      where: and(
+        eq(guestbookReplyLikes.replyId, replyId),
+        eq(guestbookReplyLikes.userId, userId)
+      ),
+    });
+
+    if (existingLike) {
+      await db
+        .delete(guestbookReplyLikes)
+        .where(
+          and(
+            eq(guestbookReplyLikes.replyId, replyId),
+            eq(guestbookReplyLikes.userId, userId)
+          )
+        );
+    } else {
+      await db.insert(guestbookReplyLikes).values({ replyId, userId });
+    }
+
+    revalidatePath("/guestbook");
+    return { success: true };
+  } catch (error) {
+    console.error("Error toggling reply like:", error);
+    return { error: "Failed" };
   }
 }

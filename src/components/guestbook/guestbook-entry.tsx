@@ -6,7 +6,6 @@ import { LikeButton } from "./like-button";
 import { ReplyButton } from "./reply-button";
 import { motion } from "framer-motion";
 
-// Tipe data yang kompleks (Pesan + User + Likes + Replies)
 interface GuestbookEntryProps {
   entry: {
     id: string;
@@ -25,13 +24,13 @@ interface GuestbookEntryProps {
         name: string | null;
         image: string | null;
       };
+      likes: { userId: string }[];
     }[];
   };
   currentUserId?: string;
 }
 
 export function GuestbookEntry({ entry, currentUserId }: GuestbookEntryProps) {
-  // Cek apakah user yang login sudah like pesan ini
   const isLiked = entry.likes.some((like) => like.userId === currentUserId);
 
   return (
@@ -45,7 +44,7 @@ export function GuestbookEntry({ entry, currentUserId }: GuestbookEntryProps) {
         <AvatarImage 
             src={entry.user.image || ""} 
             alt={entry.user.name || "User"} 
-            referrerPolicy="no-referrer" // 👈 WAJIB ADA: Biar gambar Google muncul
+            referrerPolicy="no-referrer"
         />
         <AvatarFallback>{entry.user.name?.[0] || "?"}</AvatarFallback>
       </Avatar>
@@ -66,10 +65,10 @@ export function GuestbookEntry({ entry, currentUserId }: GuestbookEntryProps) {
           {entry.message}
         </p>
 
-        {/* Action Buttons (Like & Reply) */}
+        {/* Action Buttons (Like & Reply) UTAMA */}
         <div className="flex items-center gap-4 pt-2 border-t border-border/40 mt-3">
           <LikeButton
-            guestbookId={entry.id}
+            itemId={entry.id}
             initialLikes={entry.likes.length}
             isLiked={isLiked}
             currentUserId={currentUserId}
@@ -85,28 +84,55 @@ export function GuestbookEntry({ entry, currentUserId }: GuestbookEntryProps) {
         {/* --- THREAD BALASAN (REPLIES) --- */}
         {entry.replies.length > 0 && (
           <div className="mt-4 space-y-3 pl-4 border-l-2 border-border/50">
-            {entry.replies.map((reply) => (
-              <div key={reply.id} className="flex gap-3 bg-muted/30 p-3 rounded-lg">
-                <Avatar className="w-6 h-6 mt-1">
-                  <AvatarImage 
-                    src={reply.author.image || ""} 
-                    referrerPolicy="no-referrer" // 👈 WAJIB ADA: Untuk avatar reply juga
-                  />
-                  <AvatarFallback className="text-[10px]">{reply.author.name?.[0]}</AvatarFallback>
-                </Avatar>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-xs font-semibold">{reply.author.name}</span>
-                    <span className="text-[10px] text-muted-foreground">
-                      {formatDistanceToNow(new Date(reply.createdAt))} ago
-                    </span>
+            {entry.replies.map((reply) => {
+              const isReplyLiked = reply.likes.some(l => l.userId === currentUserId);
+              
+              return (
+                <div key={reply.id} className="flex gap-3 bg-muted/30 p-3 rounded-lg hover:bg-muted/50 transition-colors group">
+                  <Avatar className="w-6 h-6 mt-1">
+                    <AvatarImage 
+                      src={reply.author.image || ""} 
+                      referrerPolicy="no-referrer"
+                    />
+                    <AvatarFallback className="text-[10px]">{reply.author.name?.[0]}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between mb-1">
+                        <div className="flex items-center gap-2">
+                            <span className="text-xs font-semibold">{reply.author.name}</span>
+                            <span className="text-[10px] text-muted-foreground">
+                                {formatDistanceToNow(new Date(reply.createdAt))} ago
+                            </span>
+                        </div>
+                        
+                        {/* Container Tombol Kecil (Like & Reply) */}
+                        <div className="flex items-center gap-2">
+                           {/* Tombol Like Reply */}
+                           <LikeButton
+                              itemId={reply.id}
+                              initialLikes={reply.likes.length}
+                              isLiked={isReplyLiked}
+                              currentUserId={currentUserId}
+                              isReply={true}
+                           />
+                           
+                           {/* 👇 Tombol Reply to Reply (Nested) */}
+                           <ReplyButton
+                              guestbookId={entry.id} // Tetap ID induk
+                              authorName={entry.user.name || "User"} 
+                              replyToUser={reply.author.name || "User"} // Nama yang mau di-mention
+                              currentUserId={currentUserId}
+                              isReplyButton={true} // Mode tombol kecil
+                           />
+                        </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                      {reply.content}
+                    </p>
                   </div>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    {reply.content}
-                  </p>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

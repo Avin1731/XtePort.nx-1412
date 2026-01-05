@@ -3,7 +3,7 @@ import { db } from "@/lib/db";
 import { guestbook } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
 import { GuestbookForm } from "@/components/guestbook/guestbook-form";
-import { GuestbookEntry } from "@/components/guestbook/guestbook-entry"; // 👈 Import Component Baru
+import { GuestbookEntry } from "@/components/guestbook/guestbook-entry"; 
 import { Badge } from "@/components/ui/badge";
 import { Hash, Filter, MessageSquare, Info } from "lucide-react";
 import Link from "next/link";
@@ -25,7 +25,6 @@ const TOPICS = [
   { name: "Hire Me", slug: "Hire Me" },
 ];
 
-// Kita export function ini biar bisa dipakai di component lain kalau perlu
 export const getTopicColor = (topic: string) => {
   switch (topic) {
     case "Bug Report": return "bg-red-500/10 text-red-500 hover:bg-red-500/20 border-red-500/20";
@@ -36,7 +35,6 @@ export const getTopicColor = (topic: string) => {
   }
 };
 
-// Agar data selalu fresh saat ada like/reply baru
 export const dynamic = "force-dynamic";
 
 type Props = {
@@ -48,18 +46,19 @@ export default async function GuestbookPage({ searchParams }: Props) {
   const params = await searchParams;
   const topicFilter = params.topic;
 
-  // 🔥 1. FETCH DATA WITH RELATIONS (User + Likes + Replies)
+  // 🔥 1. FETCH DATA WITH RELATIONS (User + Likes + Replies w/ Likes)
   const entries = await db.query.guestbook.findMany({
     where: topicFilter ? eq(guestbook.topic, topicFilter) : undefined,
     orderBy: [desc(guestbook.createdAt)],
     with: {
-      user: true,        // Ambil data pengirim
-      likes: true,       // Ambil data likes (untuk hitung jumlah & cek status liked)
-      replies: {         // Ambil data balasan
+      user: true,        
+      likes: true,       
+      replies: {         
         with: {
-          author: true,  // ...beserta penulis balasannya
+          author: true,  
+          likes: true, // 👈 PENTING: Ambil data likes milik reply
         },
-        orderBy: (replies, { asc }) => [asc(replies.createdAt)], // Urutkan balasan lama -> baru
+        orderBy: (replies, { asc }) => [asc(replies.createdAt)],
       },
     },
   });
@@ -82,7 +81,6 @@ export default async function GuestbookPage({ searchParams }: Props) {
         
         {/* KIRI: CONTENT MAIN */}
         <div className="lg:col-span-3 space-y-8">
-            {/* Form Input Pesan Baru */}
             <GuestbookForm user={session?.user} />
 
             <div className="space-y-6">
@@ -96,7 +94,6 @@ export default async function GuestbookPage({ searchParams }: Props) {
                     </Badge>
                 </div>
 
-                {/* List Entries */}
                 {entries.length === 0 ? (
                     <div className="text-center py-16 bg-secondary/20 rounded-2xl border border-dashed border-border/60">
                         <div className="bg-background w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm">
@@ -108,7 +105,6 @@ export default async function GuestbookPage({ searchParams }: Props) {
                 ) : (
                     <div className="grid gap-6">
                         {entries.map((entry) => (
-                           // 👇 MENGGUNAKAN COMPONENT BARU
                            <GuestbookEntry 
                               key={entry.id} 
                               entry={entry} 

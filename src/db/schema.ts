@@ -155,17 +155,17 @@ export const guestbookReplies = pgTable("guestbook_replies", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
-  guestbookId: text("guestbook_id") // Wajib text karena guestbook.id adalah text
+  guestbookId: text("guestbook_id")
     .notNull()
     .references(() => guestbook.id, { onDelete: "cascade" }),
-  userId: text("user_id") // Wajib text karena users.id adalah text
+  userId: text("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   content: text("content").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-// --- Table: Guestbook Likes ---
+// --- Table: Guestbook Likes (Postingan Utama) ---
 export const guestbookLikes = pgTable(
   "guestbook_likes",
   {
@@ -178,8 +178,24 @@ export const guestbookLikes = pgTable(
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
   (table) => [
-      // Composite Primary Key: 1 User cuma bisa Like 1x per Post
-      primaryKey({ columns: [table.guestbookId, table.userId] }),
+    primaryKey({ columns: [table.guestbookId, table.userId] }),
+  ]
+);
+
+// --- Table: Guestbook Reply Likes (NEW: Like untuk Balasan) ---
+export const guestbookReplyLikes = pgTable(
+  "guestbook_reply_likes",
+  {
+    replyId: text("reply_id")
+      .notNull()
+      .references(() => guestbookReplies.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.replyId, table.userId] }),
   ]
 );
 
@@ -188,13 +204,13 @@ export const notifications = pgTable("notifications", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
-  userId: text("user_id") // Penerima notif
+  userId: text("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
-  triggerUserId: text("trigger_user_id") // Pelaku (User A like User B)
+  triggerUserId: text("trigger_user_id")
     .references(() => users.id, { onDelete: "set null" }),
-  type: text("type").notNull(), // 'LIKE', 'REPLY', 'ADMIN_REPLY'
-  referenceId: text("reference_id"), // ID Guestbook / Reply terkait
+  type: text("type").notNull(),
+  referenceId: text("reference_id"),
   isRead: boolean("is_read").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
@@ -213,8 +229,8 @@ export const guestbookRelations = relations(guestbook, ({ one, many }) => ({
   likes: many(guestbookLikes),
 }));
 
-// Relasi Replies
-export const guestbookRepliesRelations = relations(guestbookReplies, ({ one }) => ({
+// Relasi Replies (UPDATE: Tambah likes)
+export const guestbookRepliesRelations = relations(guestbookReplies, ({ one, many }) => ({
   parent: one(guestbook, {
     fields: [guestbookReplies.guestbookId],
     references: [guestbook.id],
@@ -223,9 +239,10 @@ export const guestbookRepliesRelations = relations(guestbookReplies, ({ one }) =
     fields: [guestbookReplies.userId],
     references: [users.id],
   }),
+  likes: many(guestbookReplyLikes), // 👈 New Relation
 }));
 
-// Relasi Likes
+// Relasi Likes (Postingan Utama)
 export const guestbookLikesRelations = relations(guestbookLikes, ({ one }) => ({
   guestbook: one(guestbook, {
     fields: [guestbookLikes.guestbookId],
@@ -233,6 +250,18 @@ export const guestbookLikesRelations = relations(guestbookLikes, ({ one }) => ({
   }),
   user: one(users, {
     fields: [guestbookLikes.userId],
+    references: [users.id],
+  }),
+}));
+
+// Relasi Likes (Balasan) - NEW
+export const guestbookReplyLikesRelations = relations(guestbookReplyLikes, ({ one }) => ({
+  reply: one(guestbookReplies, {
+    fields: [guestbookReplyLikes.replyId],
+    references: [guestbookReplies.id],
+  }),
+  user: one(users, {
+    fields: [guestbookReplyLikes.userId],
     references: [users.id],
   }),
 }));

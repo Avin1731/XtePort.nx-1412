@@ -15,16 +15,26 @@ import { Textarea } from "@/components/ui/textarea";
 import { submitReply } from "@/actions/guestbook-social";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 interface ReplyButtonProps {
   guestbookId: string;
-  authorName: string;
+  authorName: string; // Nama pemilik postingan UTAMA
+  replyToUser?: string; // (Opsional) Nama user yang mau dibalas di dalam thread
   currentUserId?: string;
+  isReplyButton?: boolean; // Penanda visual kalau ini tombol kecil di dalam thread
 }
 
-export function ReplyButton({ guestbookId, authorName, currentUserId }: ReplyButtonProps) {
+export function ReplyButton({ 
+  guestbookId, 
+  authorName, 
+  replyToUser, 
+  currentUserId,
+  isReplyButton = false
+}: ReplyButtonProps) {
   const [open, setOpen] = useState(false);
-  const [content, setContent] = useState("");
+  // Kalau ada replyToUser, pre-fill text dengan mention
+  const [content, setContent] = useState(replyToUser ? `@${replyToUser} ` : "");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
@@ -37,7 +47,7 @@ export function ReplyButton({ guestbookId, authorName, currentUserId }: ReplyBut
 
     if (result?.success) {
       toast.success("Reply sent!");
-      setContent("");
+      setContent(""); // Reset
       setOpen(false);
       router.refresh();
     } else {
@@ -50,6 +60,8 @@ export function ReplyButton({ guestbookId, authorName, currentUserId }: ReplyBut
       toast.error("Please login to reply!");
       return;
     }
+    // Reset content saat dibuka, pasang mention kalau ada
+    setContent(replyToUser ? `@${replyToUser} ` : "");
     setOpen(true);
   };
 
@@ -60,24 +72,30 @@ export function ReplyButton({ guestbookId, authorName, currentUserId }: ReplyBut
           variant="ghost"
           size="sm"
           onClick={handleOpen}
-          className="flex items-center gap-1.5 px-2 text-muted-foreground hover:text-foreground"
+          className={cn(
+            "flex items-center gap-1.5 transition-colors text-muted-foreground hover:text-foreground",
+            isReplyButton ? "h-6 px-1.5 text-[10px]" : "h-8 px-2 text-xs font-medium"
+          )}
         >
-          <MessageCircle className="w-4 h-4" />
-          <span className="text-xs font-medium">Reply</span>
+          <MessageCircle className={cn(isReplyButton ? "w-3 h-3" : "w-4 h-4")} />
+          <span>Reply</span>
         </Button>
       </DialogTrigger>
       
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Replying to {authorName}</DialogTitle>
+          <DialogTitle>
+            {replyToUser ? `Replying to @${replyToUser}` : `Replying to ${authorName}`}
+          </DialogTitle>
         </DialogHeader>
         
         <div className="space-y-4 py-2">
           <Textarea
-            placeholder="Write your reply..."
+            placeholder={replyToUser ? `Replying to @${replyToUser}...` : "Write your reply..."}
             value={content}
             onChange={(e) => setContent(e.target.value)}
             className="min-h-[100px] resize-none"
+            autoFocus
           />
         </div>
 
