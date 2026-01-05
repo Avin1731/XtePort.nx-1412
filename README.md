@@ -47,15 +47,23 @@ Goal: Chatbot widget, Guestbook, dan Message System.
 - [x] **Message System:** Server Action untuk User post pesan privat ke database.
 - [x] **Admin Inbox:** Dashboard UI untuk membaca dan menghapus pesan masuk.
 
-### 🔔 Phase 5: Advanced Features & Engagement (In Progress)
+### 🔔 Phase 5: Advanced Features & Engagement (Completed)
 Goal: Upgrade Guestbook jadi Forum (Sidebar), Notifikasi, dan Email.
-- [ ] **Guestbook V2 (Forum Logic):** Implementasi Topic Tags, Filtering, dan Sidebar Kanan.
-- [ ] **Admin Notif:** Indicator (badge merah) saat ada pesan/guestbook baru.
-- [ ] **Email Setup:** Setup Resend SDK & Domain verification.
-- [ ] **Reply System:** Fitur reply pesan dari dashboard admin.
-- [ ] **Email Trigger:** Otomatis kirim email notifikasi ke user saat admin membalas.
+- [x] **Guestbook V2 (Forum UI):** Implementasi Topic Tags, Filtering, dan Sidebar Kanan.
+- [x] **Admin Notif System:** Lonceng Header & Sidebar Badges (Inbox & Guestbook).
+- [x] **Navigation UX:** Home link & Smart Admin Trigger di Navbar.
+- [x] **Email Setup:** Setup Resend SDK & Domain verification.
+- [x] **Reply System:** Admin balas pesan inbox -> Masuk email user (via Resend).
 
-### ✨ Phase 6: Polish & SEO
+### 🚀 Phase 6: Guestbook V3 (Social Style) (In Progress)
+Goal: Interaksi 2 Arah, Like, Threaded Replies, & User Notifications.
+- [ ] **Database Upgrade:** Buat tabel `GuestbookReplies`, `GuestbookLikes`, & `UserNotifications`.
+- [ ] **Social UI (Frontend):** Tombol Like (Optimistic), Reply (Nested), & Thread View.
+- [ ] **User Notification Center:** Lonceng Notifikasi di Navbar User & Realtime updates.
+- [ ] **Email Loop:** Notifikasi email saat user lain membalas komentar.
+- [ ] **Admin Dashboard Integration:** Admin manage thread & reply langsung dari dashboard.
+
+### ✨ Phase 7: Polish & SEO
 Goal: Finishing touches, SEO, dan performa.
 - [ ] **SEO Meta:** Setup Metadata API (Title, Desc, OpenGraph).
 - [ ] **Loading States:** Skeleton Loading untuk UX lebih halus.
@@ -67,10 +75,11 @@ Goal: Finishing touches, SEO, dan performa.
 * **Framework:** Next.js 16 (App Router)
 * **Language:** TypeScript
 * **Styling:** Tailwind CSS v4
-* **UI Library:** shadcn/ui, Lucide React
+* **UI Library:** shadcn/ui, Lucide React, Sonner (Toast)
 * **Animation:** Framer Motion
 * **Database:** PostgreSQL (Neon) + Drizzle ORM
 * **Auth:** Auth.js (NextAuth v5)
+* **Email:** Resend API
 * **Utils:** Date-fns, Recharts (Stats)
 
 ## 📂 Folder Structure
@@ -87,9 +96,10 @@ Goal: Finishing touches, SEO, dan performa.
 ## 🚀 Getting Started
 
 ### 1. Install Dependencies
-
 ```bash
 pnpm install
+# or
+npm install
 ```
 
 ### 2. Setup Environment Variables
@@ -124,5 +134,7 @@ Start the local server:
 
 ```bash
 pnpm dev
+# or
+npm run dev
 Open http://localhost:3000 with your browser to see the result.
 ```
