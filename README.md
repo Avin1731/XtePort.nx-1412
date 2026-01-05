@@ -87,5 +87,42 @@ Goal: Finishing touches, SEO, dan performa.
 ## 🚀 Getting Started
 
 ### 1. Install Dependencies
+
 ```bash
 pnpm install
+```
+
+### 2. Setup Environment Variables
+Create a .env file in the root directory and add the following keys:
+
+```bash
+# Database (Neon PostgreSQL)
+DATABASE_URL="postgresql://neondb_owner:..."
+
+# Auth Secret (Generate random string for encryption)
+AUTH_SECRET="your_secret_key_random_string"
+
+# Google OAuth (For Login)
+AUTH_GOOGLE_ID="your_google_client_id"
+AUTH_GOOGLE_SECRET="your_google_client_secret"
+
+# Admin Access
+ADMIN_EMAIL="your_email@gmail.com"
+
+# Email Service (Resend)
+RESEND_API_KEY="re_123..."
+```
+
+### 3. Database Migration
+Push the schema to your Neon database to create tables:
+
+```bash
+npx drizzle-kit push
+```
+### 4. Run Development Server
+Start the local server:
+
+```bash
+pnpm dev
+Open http://localhost:3000 with your browser to see the result.
+```
