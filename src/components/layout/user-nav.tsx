@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { User, LayoutDashboard, LogOut } from "lucide-react" // Tambah icon LayoutDashboard
+import { User, LayoutDashboard, LogOut } from "lucide-react" 
 import Link from "next/link"
 
 export async function UserNav() {
@@ -71,7 +71,8 @@ export async function UserNav() {
           <form
             action={async () => {
               "use server"
-              await signOut()
+              // 👇 MODIFIKASI DI SINI: Redirect ke root setelah logout
+              await signOut({ redirectTo: "/" })
             }}
             className="w-full"
           >
