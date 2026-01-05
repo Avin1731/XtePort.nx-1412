@@ -9,6 +9,7 @@ import {
   varchar,
   uuid
 } from "drizzle-orm/pg-core"
+import { relations } from "drizzle-orm"
 import type { AdapterAccountType } from "next-auth/adapters"
 
 // =========================================
@@ -90,7 +91,6 @@ export const guestbook = pgTable("guestbook", {
     .references(() => users.id, { onDelete: "cascade" }),
   message: text("message").notNull(),
   topic: text("topic").default("General").notNull(),
-  // 👇 UPDATE: Added isRead column
   isRead: boolean("is_read").default(false),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 })
@@ -145,3 +145,106 @@ export const messages = pgTable("messages", {
   isRead: boolean("is_read").default(false),
   createdAt: timestamp("created_at").defaultNow(),
 });
+
+// =========================================
+// SECTION 5: SOCIAL FEATURES (PHASE 6)
+// =========================================
+
+// --- Table: Guestbook Replies ---
+export const guestbookReplies = pgTable("guestbook_replies", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  guestbookId: text("guestbook_id") // Wajib text karena guestbook.id adalah text
+    .notNull()
+    .references(() => guestbook.id, { onDelete: "cascade" }),
+  userId: text("user_id") // Wajib text karena users.id adalah text
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  content: text("content").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// --- Table: Guestbook Likes ---
+export const guestbookLikes = pgTable(
+  "guestbook_likes",
+  {
+    guestbookId: text("guestbook_id")
+      .notNull()
+      .references(() => guestbook.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+      // Composite Primary Key: 1 User cuma bisa Like 1x per Post
+      primaryKey({ columns: [table.guestbookId, table.userId] }),
+  ]
+);
+
+// --- Table: User Notifications ---
+export const notifications = pgTable("notifications", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  userId: text("user_id") // Penerima notif
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  triggerUserId: text("trigger_user_id") // Pelaku (User A like User B)
+    .references(() => users.id, { onDelete: "set null" }),
+  type: text("type").notNull(), // 'LIKE', 'REPLY', 'ADMIN_REPLY'
+  referenceId: text("reference_id"), // ID Guestbook / Reply terkait
+  isRead: boolean("is_read").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// =========================================
+// SECTION 6: RELATIONS
+// =========================================
+
+// Relasi Guestbook (Induk)
+export const guestbookRelations = relations(guestbook, ({ one, many }) => ({
+  user: one(users, {
+    fields: [guestbook.userId],
+    references: [users.id],
+  }),
+  replies: many(guestbookReplies),
+  likes: many(guestbookLikes),
+}));
+
+// Relasi Replies
+export const guestbookRepliesRelations = relations(guestbookReplies, ({ one }) => ({
+  parent: one(guestbook, {
+    fields: [guestbookReplies.guestbookId],
+    references: [guestbook.id],
+  }),
+  author: one(users, {
+    fields: [guestbookReplies.userId],
+    references: [users.id],
+  }),
+}));
+
+// Relasi Likes
+export const guestbookLikesRelations = relations(guestbookLikes, ({ one }) => ({
+  guestbook: one(guestbook, {
+    fields: [guestbookLikes.guestbookId],
+    references: [guestbook.id],
+  }),
+  user: one(users, {
+    fields: [guestbookLikes.userId],
+    references: [users.id],
+  }),
+}));
+
+// Relasi Notifications
+export const notificationsRelations = relations(notifications, ({ one }) => ({
+  recipient: one(users, {
+    fields: [notifications.userId],
+    references: [users.id],
+  }),
+  triggerUser: one(users, {
+    fields: [notifications.triggerUserId],
+    references: [users.id],
+  }),
+}));
