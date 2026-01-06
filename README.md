@@ -60,10 +60,15 @@ Goal: Interaksi 2 Arah, Like, Threaded Replies, & User Notifications.
 - [x] **Database Upgrade:** Buat tabel `GuestbookReplies`, `GuestbookLikes`, & `UserNotifications`.
 - [x] **Social UI (Frontend):** Tombol Like (Optimistic), Reply (Nested), & Thread View.
 - [x] **User Notification Center:** Lonceng Notifikasi di Navbar User & Realtime updates.
-- [x] **Email Loop:** Notifikasi email saat user lain membalas komentar (via Resend + Custom Domain).
-- [] **Admin Dashboard Integration:** Admin manage thread & reply.
+- [x] **Email Loop:** Notifikasi email saat user lain membalas komentar (Fixed via Manual Query).
 
-### ✨ Phase 7: Polish & SEO (Next Step)
+### 🛡️ Phase 7: Admin Social Management (Next Step)
+Goal: Kontrol penuh Admin terhadap fitur sosial baru.
+- [ ] **Admin Dashboard Integration:** Integrasi tab khusus untuk memantau Thread.
+- [ ] **Delete Reply Logic:** Admin bisa menghapus balasan toxic tanpa menghapus induk postingan.
+- [ ] **Thread View for Admin:** Admin bisa melihat konteks percakapan penuh di dashboard.
+
+### ✨ Phase 8: Polish & SEO
 Goal: Finishing touches, SEO, dan performa.
 - [ ] **SEO Meta:** Setup Metadata API (Title, Desc, OpenGraph).
 - [ ] **Loading States:** Skeleton Loading untuk UX lebih halus.
@@ -71,7 +76,7 @@ Goal: Finishing touches, SEO, dan performa.
 - [ ] **Mobile Check:** Final fix responsiveness.
 - [ ] **Final Release:** Merge ke main dan production deploy.
 
-### 🔮 Phase 8: Future Expansion (New!)
+### 🔮 Phase 9: Future Expansion
 Goal: Upgrade kecerdasan (AI), Integrasi API Pihak Ketiga, & Skalabilitas.
 - [ ] **AI RAG Chatbot:** Ganti FAQ statis dengan AI (OpenAI/Gemini).
 - [ ] **Spotify/GitHub Widget:** Widget real-time "Now Playing" & "Recent Commits".
