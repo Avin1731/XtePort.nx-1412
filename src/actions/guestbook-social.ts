@@ -8,6 +8,7 @@ import {
   guestbookReplies,
   guestbookReplyLikes,
   notifications,
+  users, // ✅ PASTIKAN users DI-IMPORT
 } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
@@ -20,7 +21,8 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 /**
  * TOGGLE LIKE POSTINGAN UTAMA
  */
-export async function toggleGuestbookLike(guestbookId: string) {
+export async function toggleGuestbookLike(guestbookId: string) { 
+  console.log("Starting toggleGuestbookLike...");
   const session = await auth();
   if (!session?.user?.id) return { error: "Unauthorized" };
 
@@ -71,9 +73,13 @@ export async function toggleGuestbookLike(guestbookId: string) {
 }
 
 /**
- * SUBMIT REPLY (FINAL PRODUCTION VERSION)
+ * SUBMIT REPLY (WITH NESTED TARGET LOGIC)
  */
-export async function submitReply(guestbookId: string, content: string) {
+export async function submitReply(
+  guestbookId: string, 
+  content: string, 
+  replyToId?: string
+) {
   const session = await auth();
   if (!session?.user?.id) return { error: "Unauthorized" };
 
@@ -90,46 +96,78 @@ export async function submitReply(guestbookId: string, content: string) {
       content: content.trim(),
     });
 
-    // 2. Ambil data pemilik postingan asli
-    const post = await db.query.guestbook.findFirst({
-      where: eq(guestbook.id, guestbookId),
-      with: {
-        user: true, 
-      },
-    });
+    // 2. Tentukan Target Notifikasi
+    let targetUserId = "";
+    let targetEmail = "";
+    let targetName = "";
 
-    // 3. Logic Notifikasi
-    if (post && post.userId !== userId) {
-      // A. Notif DB (Lonceng Website)
+    if (replyToId) {
+      // A. Jika membalas komentar orang lain
+      const parentReply = await db.query.guestbookReplies.findFirst({
+        where: eq(guestbookReplies.id, replyToId),
+      });
+
+      if (parentReply) {
+        targetUserId = parentReply.userId;
+        
+        // Query user secara terpisah
+        const parentUser = await db.query.users.findFirst({
+          where: eq(users.id, parentReply.userId),
+        });
+        
+        if (parentUser) {
+          targetEmail = parentUser.email || "";
+          targetName = parentUser.name || "User";
+        }
+      }
+    } else {
+      // B. Jika membalas postingan utama
+      const post = await db.query.guestbook.findFirst({
+        where: eq(guestbook.id, guestbookId),
+      });
+
+      if (post) {
+        targetUserId = post.userId;
+        
+        // Query user secara terpisah
+        const postUser = await db.query.users.findFirst({
+          where: eq(users.id, post.userId),
+        });
+        
+        if (postUser) {
+          targetEmail = postUser.email || "";
+          targetName = postUser.name || "User";
+        }
+      }
+    }
+
+    // 3. Kirim Notifikasi
+    if (targetUserId && targetUserId !== userId) {
       await db.insert(notifications).values({
-        userId: post.userId,
+        userId: targetUserId,
         triggerUserId: userId,
         type: "REPLY",
         referenceId: guestbookId,
         isRead: false,
       });
 
-      // B. Notif Email (Resend Production)
-      if (post.user.email && process.env.RESEND_API_KEY) {
+      // Email notification
+      if (targetEmail && process.env.RESEND_API_KEY) {
         try {
           await resend.emails.send({
-            // 👇 UPDATE: Pakai domain barumu
             from: "Guestbook A-1412 <noreply@xteonlyone1412.my.id>", 
-            
-            // 👇 UPDATE: Kirim ke pemilik postingan asli (Bukan hardcode admin lagi)
-            to: post.user.email, 
-            
-            subject: "💬 New reply on your Guestbook post",
+            to: targetEmail, 
+            subject: replyToId ? "💬 Someone replied to your comment" : "💬 New reply on your Guestbook post",
             react: ReplyNotificationEmail({
-              recipientName: post.user.name || "User",
+              recipientName: targetName,
               senderName: userName,
               replyContent: content.trim(),
               postUrl: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/guestbook`,
             }),
           });
+          console.log(`✅ Email sent to ${targetEmail}`);
         } catch (emailError) {
-          // Kita log error tapi jangan gagalkan proses reply di UI
-          console.error("❌ Failed to send email via Resend:", emailError);
+          console.error("❌ Failed to send email:", emailError);
         }
       }
     }

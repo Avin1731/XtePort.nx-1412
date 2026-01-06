@@ -13,28 +13,20 @@ import { relations } from "drizzle-orm"
 import type { AdapterAccountType } from "next-auth/adapters"
 
 // =========================================
-// SECTION 1: AUTHENTICATION (NextAuth)
+// 1. TABLES
 // =========================================
 
-// --- Table: Users ---
 export const users = pgTable("user", {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   name: text("name"),
   email: text("email").notNull(),
   emailVerified: timestamp("emailVerified", { mode: "date" }),
   image: text("image"),
-  role: text("role").default("user"), // 'admin' or 'user'
+  role: text("role").default("user"),
 })
 
-// --- Table: Accounts ---
-export const accounts = pgTable(
-  "account",
-  {
-    userId: text("userId")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
+export const accounts = pgTable("account", {
+    userId: text("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
     type: text("type").$type<AdapterAccountType>().notNull(),
     provider: text("provider").notNull(),
     providerAccountId: text("providerAccountId").notNull(),
@@ -46,90 +38,52 @@ export const accounts = pgTable(
     id_token: text("id_token"),
     session_state: text("session_state"),
   },
-  (account) => [
-    primaryKey({
-      columns: [account.provider, account.providerAccountId],
-    }),
-  ]
+  (account) => [primaryKey({ columns: [account.provider, account.providerAccountId] })]
 )
 
-// --- Table: Sessions ---
 export const sessions = pgTable("session", {
   sessionToken: text("sessionToken").primaryKey(),
-  userId: text("userId")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
+  userId: text("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
   expires: timestamp("expires", { mode: "date" }).notNull(),
 })
 
-// --- Table: Verification Tokens ---
-export const verificationTokens = pgTable(
-  "verificationToken",
-  {
+export const verificationTokens = pgTable("verificationToken", {
     identifier: text("identifier").notNull(),
     token: text("token").notNull(),
     expires: timestamp("expires", { mode: "date" }).notNull(),
   },
-  (verificationToken) => [
-    primaryKey({
-      columns: [verificationToken.identifier, verificationToken.token],
-    }),
-  ]
+  (verificationToken) => [primaryKey({ columns: [verificationToken.identifier, verificationToken.token] })]
 )
 
-// =========================================
-// SECTION 2: FEATURES
-// =========================================
-
-// --- Table: Guestbook ---
 export const guestbook = pgTable("guestbook", {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
-  userId: text("userId")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  userId: text("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
   message: text("message").notNull(),
   topic: text("topic").default("General").notNull(),
   isRead: boolean("is_read").default(false),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 })
 
-// =========================================
-// SECTION 3: CMS & PORTFOLIO
-// =========================================
-
-// --- Table: Projects ---
 export const projects = pgTable("projects", {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   title: text("title").notNull(),
   description: text("description").notNull(),
   imageUrl: text("image_url"),
   demoUrl: text("demo_url"),
   repoUrl: text("repo_url"),
-  techStack: text("tech_stack"), // Comma separated
+  techStack: text("tech_stack"),
   isFeatured: boolean("is_featured").default(false),
   createdAt: timestamp("created_at").defaultNow(),
 })
 
-// --- Table: Tech Stack ---
 export const techStack = pgTable("tech_stack", {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   name: text("name").notNull(),
-  category: text("category"), // Frontend, Backend, Tools
-  iconName: text("icon_name"), // Lucide/SimpleIcons name
+  category: text("category"),
+  iconName: text("icon_name"),
   createdAt: timestamp("created_at").defaultNow(),
 })
 
-// =========================================
-// SECTION 4: ANALYTICS
-// =========================================
-
-// --- Table: Visitors ---
 export const visitors = pgTable("visitors", {
   id: serial("id").primaryKey(),
   ipAddress: varchar("ip_address", { length: 45 }),
@@ -137,7 +91,6 @@ export const visitors = pgTable("visitors", {
   visitedAt: timestamp("visited_at").defaultNow(),
 });
 
-// --- Table: Messages (from Chat Widget) ---
 export const messages = pgTable("messages", {
   id: uuid("id").defaultRandom().primaryKey(),
   userId: text("user_id"),
@@ -146,69 +99,34 @@ export const messages = pgTable("messages", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-// =========================================
-// SECTION 5: SOCIAL FEATURES (PHASE 6)
-// =========================================
-
-// --- Table: Guestbook Replies ---
 export const guestbookReplies = pgTable("guestbook_replies", {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
-  guestbookId: text("guestbook_id")
-    .notNull()
-    .references(() => guestbook.id, { onDelete: "cascade" }),
-  userId: text("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  guestbookId: text("guestbook_id").notNull().references(() => guestbook.id, { onDelete: "cascade" }),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   content: text("content").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-// --- Table: Guestbook Likes (Postingan Utama) ---
-export const guestbookLikes = pgTable(
-  "guestbook_likes",
-  {
-    guestbookId: text("guestbook_id")
-      .notNull()
-      .references(() => guestbook.id, { onDelete: "cascade" }),
-    userId: text("user_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
+export const guestbookLikes = pgTable("guestbook_likes", {
+    guestbookId: text("guestbook_id").notNull().references(() => guestbook.id, { onDelete: "cascade" }),
+    userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
-  (table) => [
-    primaryKey({ columns: [table.guestbookId, table.userId] }),
-  ]
+  (table) => [primaryKey({ columns: [table.guestbookId, table.userId] })]
 );
 
-// --- Table: Guestbook Reply Likes (NEW: Like untuk Balasan) ---
-export const guestbookReplyLikes = pgTable(
-  "guestbook_reply_likes",
-  {
-    replyId: text("reply_id")
-      .notNull()
-      .references(() => guestbookReplies.id, { onDelete: "cascade" }),
-    userId: text("user_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
+export const guestbookReplyLikes = pgTable("guestbook_reply_likes", {
+    replyId: text("reply_id").notNull().references(() => guestbookReplies.id, { onDelete: "cascade" }),
+    userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
-  (table) => [
-    primaryKey({ columns: [table.replyId, table.userId] }),
-  ]
+  (table) => [primaryKey({ columns: [table.replyId, table.userId] })]
 );
 
-// --- Table: User Notifications ---
 export const notifications = pgTable("notifications", {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
-  userId: text("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  triggerUserId: text("trigger_user_id")
-    .references(() => users.id, { onDelete: "set null" }),
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  triggerUserId: text("trigger_user_id").references(() => users.id, { onDelete: "set null" }),
   type: text("type").notNull(),
   referenceId: text("reference_id"),
   isRead: boolean("is_read").default(false).notNull(),
@@ -216,59 +134,68 @@ export const notifications = pgTable("notifications", {
 });
 
 // =========================================
-// SECTION 6: RELATIONS
+// 2. RELATIONS - DIPERBAIKI: LENGKAP DAN SIMETRIS
 // =========================================
 
-// Relasi Guestbook (Induk)
+// GUESTBOOK - tambahkan relasi many ke replies dan likes
 export const guestbookRelations = relations(guestbook, ({ one, many }) => ({
   user: one(users, {
     fields: [guestbook.userId],
     references: [users.id],
   }),
-  replies: many(guestbookReplies),
-  likes: many(guestbookLikes),
+  replies: many(guestbookReplies),  // Tambahan: relasi balik ke replies
+  likes: many(guestbookLikes),      // Tambahan: relasi balik ke likes
 }));
 
-// Relasi Replies (UPDATE: Tambah likes)
+// REPLIES - tambahkan relasi many ke likes
 export const guestbookRepliesRelations = relations(guestbookReplies, ({ one, many }) => ({
-  parent: one(guestbook, {
-    fields: [guestbookReplies.guestbookId],
-    references: [guestbook.id],
-  }),
-  author: one(users, {
+  user: one(users, {
     fields: [guestbookReplies.userId],
     references: [users.id],
   }),
-  likes: many(guestbookReplyLikes), // 👈 New Relation
-}));
-
-// Relasi Likes (Postingan Utama)
-export const guestbookLikesRelations = relations(guestbookLikes, ({ one }) => ({
   guestbook: one(guestbook, {
-    fields: [guestbookLikes.guestbookId],
+    fields: [guestbookReplies.guestbookId],
     references: [guestbook.id],
   }),
+  likes: many(guestbookReplyLikes),  // Tambahan: relasi balik ke reply likes
+}));
+
+// LIKES - tetap sama, tapi pastikan konsisten
+export const guestbookLikesRelations = relations(guestbookLikes, ({ one }) => ({
   user: one(users, {
     fields: [guestbookLikes.userId],
     references: [users.id],
   }),
+  guestbook: one(guestbook, {
+    fields: [guestbookLikes.guestbookId],
+    references: [guestbook.id],
+  }),
 }));
 
-// Relasi Likes (Balasan) - NEW
+// REPLY LIKES - tetap sama
 export const guestbookReplyLikesRelations = relations(guestbookReplyLikes, ({ one }) => ({
-  reply: one(guestbookReplies, {
-    fields: [guestbookReplyLikes.replyId],
-    references: [guestbookReplies.id],
-  }),
   user: one(users, {
     fields: [guestbookReplyLikes.userId],
     references: [users.id],
   }),
+  reply: one(guestbookReplies, {
+    fields: [guestbookReplyLikes.replyId],
+    references: [guestbookReplies.id],
+  }),
 }));
 
-// Relasi Notifications
+// USERS - tetap sama
+export const usersRelations = relations(users, ({ many }) => ({
+  guestbooks: many(guestbook),
+  guestbookReplies: many(guestbookReplies),
+  guestbookLikes: many(guestbookLikes),
+  guestbookReplyLikes: many(guestbookReplyLikes),
+  notifications: many(notifications),
+}));
+
+// NOTIFICATIONS - tetap sama
 export const notificationsRelations = relations(notifications, ({ one }) => ({
-  recipient: one(users, {
+  user: one(users, {
     fields: [notifications.userId],
     references: [users.id],
   }),
