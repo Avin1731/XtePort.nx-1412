@@ -55,21 +55,33 @@ Goal: Upgrade Guestbook jadi Forum (Sidebar), Notifikasi, dan Email.
 - [x] **Email Setup:** Setup Resend SDK & Domain verification.
 - [x] **Reply System:** Admin balas pesan inbox -> Masuk email user (via Resend).
 
-### 🚀 Phase 6: Guestbook V3 (Social Style) (In Progress)
+### 🚀 Phase 6: Guestbook V3 (Social Style) (Completed)
 Goal: Interaksi 2 Arah, Like, Threaded Replies, & User Notifications.
-- [ ] **Database Upgrade:** Buat tabel `GuestbookReplies`, `GuestbookLikes`, & `UserNotifications`.
-- [ ] **Social UI (Frontend):** Tombol Like (Optimistic), Reply (Nested), & Thread View.
-- [ ] **User Notification Center:** Lonceng Notifikasi di Navbar User & Realtime updates.
-- [ ] **Email Loop:** Notifikasi email saat user lain membalas komentar.
-- [ ] **Admin Dashboard Integration:** Admin manage thread & reply langsung dari dashboard.
+- [x] **Database Upgrade:** Buat tabel `GuestbookReplies`, `GuestbookLikes`, & `UserNotifications`.
+- [x] **Social UI (Frontend):** Tombol Like (Optimistic), Reply (Nested), & Thread View.
+- [x] **User Notification Center:** Lonceng Notifikasi di Navbar User & Realtime updates.
+- [x] **Email Loop:** Notifikasi email saat user lain membalas komentar (Fixed via Manual Query).
 
-### ✨ Phase 7: Polish & SEO
+### 🛡️ Phase 7: Admin Social Management (Next Step)
+Goal: Kontrol penuh Admin terhadap fitur sosial baru.
+- [ ] **Admin Dashboard Integration:** Integrasi tab khusus untuk memantau Thread.
+- [ ] **Delete Reply Logic:** Admin bisa menghapus balasan toxic tanpa menghapus induk postingan.
+- [ ] **Thread View for Admin:** Admin bisa melihat konteks percakapan penuh di dashboard.
+
+### ✨ Phase 8: Polish & SEO
 Goal: Finishing touches, SEO, dan performa.
 - [ ] **SEO Meta:** Setup Metadata API (Title, Desc, OpenGraph).
 - [ ] **Loading States:** Skeleton Loading untuk UX lebih halus.
 - [ ] **Error Handling:** Custom 404 dan Error pages.
 - [ ] **Mobile Check:** Final fix responsiveness.
 - [ ] **Final Release:** Merge ke main dan production deploy.
+
+### 🔮 Phase 9: Future Expansion
+Goal: Upgrade kecerdasan (AI), Integrasi API Pihak Ketiga, & Skalabilitas.
+- [ ] **AI RAG Chatbot:** Ganti FAQ statis dengan AI (OpenAI/Gemini).
+- [ ] **Spotify/GitHub Widget:** Widget real-time "Now Playing" & "Recent Commits".
+- [ ] **Internationalization (i18n):** Dukungan dua bahasa (ID/EN).
+- [ ] **Testing & PWA:** Unit Testing & Installable Web App.
 
 ## 🛠️ Tech Stack
 * **Framework:** Next.js 16 (App Router)
@@ -136,5 +148,5 @@ Start the local server:
 pnpm dev
 # or
 npm run dev
-Open http://localhost:3000 with your browser to see the result.
 ```
+Open http://localhost:3000 with your browser to see the result.
