@@ -40,6 +40,28 @@ export async function getRepliesForAdmin(guestbookId: string) {
 }
 
 /**
+ * [ADMIN] MARK AS READ (ONE WAY)
+ * Hanya mengubah status menjadi TRUE. Tidak bisa dibalikkan.
+ */
+export async function markGuestbookAsRead(id: string) {
+  await checkAdmin();
+
+  try {
+    await db
+        .update(guestbook)
+        .set({ isRead: true })
+        .where(eq(guestbook.id, id));
+
+    revalidatePath("/dashboard/guestbook");
+    return { success: true };
+  } catch (error) {
+    // FIX: Gunakan variable error agar linter tidak komplain
+    console.error("Mark read error:", error);
+    return { error: "Failed to update status" };
+  }
+}
+
+/**
  * [ADMIN] HAPUS REPLY
  */
 export async function deleteReply(replyId: string) {
@@ -68,7 +90,6 @@ export async function deleteGuestbookEntry(id: string) {
     revalidatePath("/guestbook");
     return { success: true };
   } catch (error) {
-    // FIX: Log error agar linter tidak komplain 'unused var', atau hapus variable 'error'
     console.error("Delete entry error:", error); 
     return { error: "Failed to delete entry" };
   }

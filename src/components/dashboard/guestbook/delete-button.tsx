@@ -28,19 +28,17 @@ export function DeleteGuestbookButton({ id }: DeleteGuestbookButtonProps) {
 
   return (
     <Button
-      variant="destructive"
-      size="sm"
-      className="h-8 px-2 bg-red-500/10 text-red-600 hover:bg-red-500/20 hover:text-red-700 border-red-200"
+      variant="ghost"
+      size="icon"
+      className="text-muted-foreground hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
       onClick={handleDelete}
       disabled={isPending}
+      title="Delete Post"
     >
       {isPending ? (
         <Loader2 className="w-4 h-4 animate-spin" />
       ) : (
-        <>
-            <Trash2 className="w-4 h-4 mr-2" />
-            Delete Post
-        </>
+        <Trash2 className="w-4 h-4" />
       )}
     </Button>
   );

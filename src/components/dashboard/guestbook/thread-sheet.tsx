@@ -16,7 +16,7 @@ import { deleteReply, getRepliesForAdmin } from "@/actions/admin-guestbook";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 
-// Definisi tipe data reply untuk state
+// Tipe data sama seperti sebelumnya...
 type AdminReply = {
   id: string;
   content: string;
@@ -44,7 +44,7 @@ export function ThreadSheet({ guestbookId, triggerCount = 0 }: ThreadSheetProps)
       setIsLoading(true);
       try {
         const data = await getRepliesForAdmin(guestbookId);
-        // Mapping hasil query ke tipe state yang aman
+        // Mapping manual agar aman dari tipe any
         const mappedData: AdminReply[] = data.map(item => ({
             id: item.id,
             content: item.content,
@@ -66,7 +66,6 @@ export function ThreadSheet({ guestbookId, triggerCount = 0 }: ThreadSheetProps)
 
   const handleDelete = async (replyId: string) => {
     if (!confirm("Delete this reply permanently?")) return;
-
     const res = await deleteReply(replyId);
     if (res.success) {
       setReplies((prev) => prev.filter((r) => r.id !== replyId));
@@ -79,11 +78,16 @@ export function ThreadSheet({ guestbookId, triggerCount = 0 }: ThreadSheetProps)
   return (
     <Sheet open={isOpen} onOpenChange={handleOpen}>
       <SheetTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-2 h-8 relative">
+        {/* 👇 TRIGGER ICON ONLY */}
+        <Button 
+            variant="ghost" 
+            size="icon" 
+            className="text-muted-foreground hover:text-foreground relative"
+            title="View Thread"
+        >
             <MessageSquare className="w-4 h-4" />
-            <span className="hidden sm:inline">Thread</span>
             {triggerCount > 0 && (
-                <span className="bg-primary/10 text-primary text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
+                <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-[9px] font-bold px-1 rounded-full min-w-[16px] h-[16px] flex items-center justify-center border-2 border-background shadow-sm">
                     {triggerCount}
                 </span>
             )}
@@ -129,7 +133,7 @@ export function ThreadSheet({ guestbookId, triggerCount = 0 }: ThreadSheetProps)
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="text-muted-foreground hover:text-red-600 h-7 w-7"
+                  className="text-muted-foreground hover:text-red-600 h-7 w-7 shrink-0"
                   onClick={() => handleDelete(reply.id)}
                 >
                   <Trash2 className="w-4 h-4" />
