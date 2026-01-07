@@ -4,7 +4,8 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Footer } from "@/components/layout/footer";
 import VisitorTracker from "@/components/analytics/VisitorTracker";
-import { ChatWidget } from "@/components/chat/chat-widget";
+// Pastikan import path ini sesuai dengan lokasi file wrapper yang kamu buat
+import ChatWidgetWrapper  from "@/components/chat/chat-widget-wrapper";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -37,7 +38,10 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <main className="flex-1">{children}</main>
-          <ChatWidget />
+          
+          {/* 👇 UPDATE DISINI: Gunakan Wrapper agar chatbot hilang di Dashboard */}
+          <ChatWidgetWrapper />
+          
           <Footer />
         </ThemeProvider>
       </body>

@@ -62,13 +62,15 @@ Goal: Interaksi 2 Arah, Like, Threaded Replies, & User Notifications.
 - [x] **User Notification Center:** Lonceng Notifikasi di Navbar User & Realtime updates.
 - [x] **Email Loop:** Notifikasi email saat user lain membalas komentar (Fixed via Manual Query).
 
-### 🛡️ Phase 7: Admin Social Management (Next Step)
-Goal: Kontrol penuh Admin terhadap fitur sosial baru.
-- [ ] **Admin Dashboard Integration:** Integrasi tab khusus untuk memantau Thread.
-- [ ] **Delete Reply Logic:** Admin bisa menghapus balasan toxic tanpa menghapus induk postingan.
-- [ ] **Thread View for Admin:** Admin bisa melihat konteks percakapan penuh di dashboard.
+### 🛡️ Phase 7: Admin Social Management (Completed)
+Goal: Kontrol penuh Admin terhadap fitur sosial baru & Interaksi Official.
+- [x] **Admin Dashboard Integration:** Integrasi tab khusus & Thread Sheet UI dengan Post Highlight.
+- [x] **Moderation:** Admin bisa menghapus balasan toxic tanpa menghapus induk postingan.
+- [x] **Thread View:** Admin bisa melihat konteks percakapan penuh (Parent Post + Replies).
+- [x] **Official Reply:** Admin reply via Dashboard -> Mengirim email "Official Response" ke user.
+- [x] **UX Polish:** Hide Chatbot di Dashboard & Perbaikan layout email templates.
 
-### ✨ Phase 8: Polish & SEO
+### ✨ Phase 8: Polish & SEO (Next Step)
 Goal: Finishing touches, SEO, dan performa.
 - [ ] **SEO Meta:** Setup Metadata API (Title, Desc, OpenGraph).
 - [ ] **Loading States:** Skeleton Loading untuk UX lebih halus.
@@ -91,7 +93,7 @@ Goal: Upgrade kecerdasan (AI), Integrasi API Pihak Ketiga, & Skalabilitas.
 * **Animation:** Framer Motion
 * **Database:** PostgreSQL (Neon) + Drizzle ORM
 * **Auth:** Auth.js (NextAuth v5)
-* **Email:** Resend API
+* **Email:** Resend API + React Email
 * **Utils:** Date-fns, Recharts (Stats)
 
 ## 📂 Folder Structure
@@ -100,6 +102,7 @@ Goal: Upgrade kecerdasan (AI), Integrasi API Pihak Ketiga, & Skalabilitas.
 * `src/components/ui` - Shadcn atomic components.
 * `src/components/layout` - Navbar, Footer, Sidebar.
 * `src/components/dashboard` - Admin specific components (Forms, Tables).
+* `src/components/emails` - React Email templates.
 * `src/components/home` - Landing page sections.
 * `src/components/animation` - Reusable motion wrappers.
 * `src/lib` - Utilities, DB config & Auth setup.
@@ -133,6 +136,13 @@ ADMIN_EMAIL="your_email@gmail.com"
 
 # Email Service (Resend)
 RESEND_API_KEY="re_123..."
+
+# NEXT_PUBLIC_APP_URL untuk konfigurasi URL aplikasi
+# saat deploy ke Vercel atau platform lain
+# NEXT_PUBLIC_APP_URL="https://..."
+# atau saat local
+NEXT_PUBLIC_APP_URL="http://localhost:3000"
+
 ```
 
 ### 3. Database Migration

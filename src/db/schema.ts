@@ -134,20 +134,20 @@ export const notifications = pgTable("notifications", {
 });
 
 // =========================================
-// 2. RELATIONS - DIPERBAIKI: LENGKAP DAN SIMETRIS
+// 2. RELATIONS - LENGKAP & SIMETRIS
 // =========================================
 
-// GUESTBOOK - tambahkan relasi many ke replies dan likes
+// GUESTBOOK
 export const guestbookRelations = relations(guestbook, ({ one, many }) => ({
   user: one(users, {
     fields: [guestbook.userId],
     references: [users.id],
   }),
-  replies: many(guestbookReplies),  // Tambahan: relasi balik ke replies
-  likes: many(guestbookLikes),      // Tambahan: relasi balik ke likes
+  replies: many(guestbookReplies),  
+  likes: many(guestbookLikes),      
 }));
 
-// REPLIES - tambahkan relasi many ke likes
+// REPLIES
 export const guestbookRepliesRelations = relations(guestbookReplies, ({ one, many }) => ({
   user: one(users, {
     fields: [guestbookReplies.userId],
@@ -157,10 +157,10 @@ export const guestbookRepliesRelations = relations(guestbookReplies, ({ one, man
     fields: [guestbookReplies.guestbookId],
     references: [guestbook.id],
   }),
-  likes: many(guestbookReplyLikes),  // Tambahan: relasi balik ke reply likes
+  likes: many(guestbookReplyLikes),  
 }));
 
-// LIKES - tetap sama, tapi pastikan konsisten
+// LIKES
 export const guestbookLikesRelations = relations(guestbookLikes, ({ one }) => ({
   user: one(users, {
     fields: [guestbookLikes.userId],
@@ -172,7 +172,7 @@ export const guestbookLikesRelations = relations(guestbookLikes, ({ one }) => ({
   }),
 }));
 
-// REPLY LIKES - tetap sama
+// REPLY LIKES
 export const guestbookReplyLikesRelations = relations(guestbookReplyLikes, ({ one }) => ({
   user: one(users, {
     fields: [guestbookReplyLikes.userId],
@@ -184,7 +184,7 @@ export const guestbookReplyLikesRelations = relations(guestbookReplyLikes, ({ on
   }),
 }));
 
-// USERS - tetap sama
+// USERS
 export const usersRelations = relations(users, ({ many }) => ({
   guestbooks: many(guestbook),
   guestbookReplies: many(guestbookReplies),
@@ -193,7 +193,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   notifications: many(notifications),
 }));
 
-// NOTIFICATIONS - tetap sama
+// NOTIFICATIONS
 export const notificationsRelations = relations(notifications, ({ one }) => ({
   user: one(users, {
     fields: [notifications.userId],
