@@ -13,7 +13,8 @@ import {
   X,
   Moon,
   Sun,
-  Mail
+  Mail,
+  PenTool // 👈 IMPORT ICON BARU
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -35,6 +36,7 @@ export function AdminSidebar({ user, counts = { messages: 0, guestbook: 0 }, onC
   const sidebarItems = [
     { title: "Home Website", href: "/", icon: Home }, 
     { title: "Overview", href: "/dashboard", icon: LayoutDashboard },
+    { title: "Blog Posts", href: "/dashboard/blog", icon: PenTool }, // 👈 MENU BARU
     { title: "Projects", href: "/dashboard/projects", icon: FolderOpen },
     { title: "Tech Stack", href: "/dashboard/tech", icon: Layers },
     { title: "Guestbook", href: "/dashboard/guestbook", icon: MessageSquare },
@@ -92,13 +94,15 @@ export function AdminSidebar({ user, counts = { messages: 0, guestbook: 0 }, onC
             href={item.href}
             className={cn(
               "flex items-center justify-between rounded-xl px-4 py-3 text-sm font-bold transition-all duration-200 group border",
-              pathname === item.href 
-                ? "bg-secondary border-primary/20 text-primary shadow-sm" 
-                : "border-transparent text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+              pathname.startsWith(item.href) && item.href !== "/" && item.href !== "/dashboard"
+                ? "bg-secondary border-primary/20 text-primary shadow-sm" // Logic active untuk sub-routes (misal /dashboard/blog/new)
+                : pathname === item.href
+                  ? "bg-secondary border-primary/20 text-primary shadow-sm"
+                  : "border-transparent text-muted-foreground hover:bg-accent hover:text-accent-foreground"
             )}
           >
             <div className="flex items-center gap-3">
-                <item.icon className={cn("h-5 w-5", pathname === item.href ? "text-primary" : "text-muted-foreground group-hover:text-foreground")} />
+                <item.icon className={cn("h-5 w-5", pathname.startsWith(item.href) && item.href !== "/" && item.href !== "/dashboard" ? "text-primary" : pathname === item.href ? "text-primary" : "text-muted-foreground group-hover:text-foreground")} />
                 {item.title}
             </div>
             
