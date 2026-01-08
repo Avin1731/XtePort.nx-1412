@@ -133,6 +133,36 @@ export const notifications = pgTable("notifications", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// 👇 NEW: BLOG POSTS SCHEMA
+export const posts = pgTable("posts", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  title: text("title").notNull(),
+  slug: text("slug").notNull().unique(), 
+  excerpt: text("excerpt").notNull(), 
+  content: text("content").notNull(), 
+  coverImage: text("cover_image"), 
+  tags: text("tags"), 
+  isPublished: boolean("is_published").default(false), 
+  viewCount: integer("view_count").default(0),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// 👇 NEW: BLOG LIKES SCHEMA
+export const postLikes = pgTable(
+  "post_likes",
+  {
+    postId: uuid("post_id")
+      .notNull()
+      .references(() => posts.id, { onDelete: "cascade" }),
+    userId: text("user_id") // References Auth.js User ID (Text)
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.postId, t.userId] })]
+);
+
 // =========================================
 // 2. RELATIONS - LENGKAP & SIMETRIS
 // =========================================
@@ -191,6 +221,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   guestbookLikes: many(guestbookLikes),
   guestbookReplyLikes: many(guestbookReplyLikes),
   notifications: many(notifications),
+  postLikes: many(postLikes), // 👈 Added: User can like many blog posts
 }));
 
 // NOTIFICATIONS
@@ -201,6 +232,22 @@ export const notificationsRelations = relations(notifications, ({ one }) => ({
   }),
   triggerUser: one(users, {
     fields: [notifications.triggerUserId],
+    references: [users.id],
+  }),
+}));
+
+// 👇 NEW: BLOG RELATIONS
+export const postsRelations = relations(posts, ({ many }) => ({
+  likes: many(postLikes),
+}));
+
+export const postLikesRelations = relations(postLikes, ({ one }) => ({
+  post: one(posts, {
+    fields: [postLikes.postId],
+    references: [posts.id],
+  }),
+  user: one(users, {
+    fields: [postLikes.userId],
     references: [users.id],
   }),
 }));

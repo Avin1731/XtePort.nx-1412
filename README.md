@@ -70,20 +70,48 @@ Goal: Kontrol penuh Admin terhadap fitur sosial baru & Interaksi Official.
 - [x] **Official Reply:** Admin reply via Dashboard -> Mengirim email "Official Response" ke user.
 - [x] **UX Polish:** Hide Chatbot di Dashboard & Perbaikan layout email templates.
 
-### ✨ Phase 8: Polish & SEO (Next Step)
-Goal: Finishing touches, SEO, dan performa.
-- [ ] **SEO Meta:** Setup Metadata API (Title, Desc, OpenGraph).
-- [ ] **Loading States:** Skeleton Loading untuk UX lebih halus.
-- [ ] **Error Handling:** Custom 404 dan Error pages.
-- [ ] **Mobile Check:** Final fix responsiveness.
-- [ ] **Final Release:** Merge ke main dan production deploy.
+### 📝 Phase 8: Dynamic Content Engine (Feature-Based) (Current Focus)
+Branch: feat/dynamic-content Goal: Migrasi konten statis menjadi dinamis (Database) secara bertahap per fitur.
 
-### 🔮 Phase 9: Future Expansion
-Goal: Upgrade kecerdasan (AI), Integrasi API Pihak Ketiga, & Skalabilitas.
-- [ ] **AI RAG Chatbot:** Ganti FAQ statis dengan AI (OpenAI/Gemini).
-- [ ] **Spotify/GitHub Widget:** Widget real-time "Now Playing" & "Recent Commits".
-- [ ] **Internationalization (i18n):** Dukungan dua bahasa (ID/EN).
-- [ ] **Testing & PWA:** Unit Testing & Installable Web App.
+#### A. The Blog Engine (First Priority)
+Fokus: Membangun sistem artikel dari nol (Database -> Admin -> Public).
+- [x] **DB Schema:** Membuat tabel `posts` (Title, Slug, Content, Tags, Published Status).
+- [x] **Server Actions:** Membuat `src/actions/blog.ts` untuk Create, Read, Update, Delete artikel.
+- [ ] **Admin CMS:** Membuat halaman Dashboard `/dashboard/blog` (List) dan `/dashboard/blog/new` (Editor).
+- [ ] **Public Page (List):** Membuat halaman `/blog` untuk menampilkan daftar artikel terbaru dari DB.
+- [ ] **Public Page (Detail):** Membuat halaman `/blog/[slug]` untuk membaca artikel full.
+
+#### B. The Profile & About Engine (Second Priority)
+Fokus: Membuat halaman About/CV dinamis agar mudah update experience/bio.
+- [ ] **DB Schema:** Membuat tabel `profile` (Bio, Avatar) dan `experience` (Work History).
+- [ ] **Server Actions:** Membuat `src/actions/profile.ts` untuk update Bio dan CRUD Experience.
+- [ ] **Admin CMS:** Membuat halaman Dashboard `/dashboard/profile` untuk form edit profile & timeline.
+- [ ] **Public Page:** Refactor halaman `/about` agar merender data timeline dari Database.
+
+#### C. Projects Dynamic Integration (Third Priority)
+Fokus: Menghapus dummy data di halaman Projects dan menghubungkannya ke DB yang sudah ada.
+- [ ] **Refactor Frontend:** Menghapus array statis di `src/app/projects/page.tsx`.
+- [ ] **Data Fetching:** Mengganti logika render dengan `db.query.projects.findMany()`.
+- [ ] **Final Check:** Memastikan gambar dan link project tampil benar dari database.
+
+#### D. Optional Enhancements
+- [ ] **Global Search:** Pencarian sederhana untuk memfilter Blog dan Projects sekaligus.
+
+### ✨ Phase 9: Polish & SEO
+Branch: feat/polish-seo Goal: Finishing touches, SEO, dan performa sebelum rilis.
+[ ] SEO Meta: Setup Metadata API (Title, Desc, OpenGraph/Twitter Cards) dinamis per halaman.
+[ ] Loading States: Skeleton Loading untuk UX lebih halus saat fetch data (Projects/Blog/Guestbook).
+[ ] Error Handling: Custom 404 (Not Found) dan 500 (Error) pages yang estetik.
+[ ] Mobile Check: Final fix responsiveness di HP kentang.
+[ ] Final Release: Merge semua ke main dan production deploy.
+
+### 🔮 Phase 10: Future Expansion
+Branch: feat/future-expansion Goal: Upgrade kecerdasan (AI), Integrasi API Pihak Ketiga, & Skalabilitas.
+[ ] AI RAG Chatbot: Ganti FAQ statis dengan AI (OpenAI/Gemini).
+[ ] Spotify/GitHub Widget: Widget real-time "Now Playing" & "Recent Commits".
+[ ] Internationalization (i18n): Dukungan dua bahasa (ID/EN).
+[ ] Testing Suite: Unit Testing (Jest) atau E2E (Playwright).
+[ ] PWA: Installable Web App.
 
 ## 🛠️ Tech Stack
 * **Framework:** Next.js 16 (App Router)

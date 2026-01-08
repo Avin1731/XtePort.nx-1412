@@ -8,10 +8,9 @@ if (!process.env.DATABASE_URL) {
 
 const sql = neon(process.env.DATABASE_URL);
 
-// PERBAIKAN: Pastikan semua tabel dan relasi terekspor
 export const db = drizzle(sql, { 
   schema: {
-    // Semua tabel
+    // === Existing Tables ===
     users: schema.users,
     accounts: schema.accounts,
     sessions: schema.sessions,
@@ -26,14 +25,20 @@ export const db = drizzle(sql, {
     visitors: schema.visitors,
     messages: schema.messages,
     
-    // Semua relasi (WAJIB untuk query dengan 'with')
+    // === 👇 NEW BLOG TABLES (Tambahkan ini) ===
+    posts: schema.posts,
+    postLikes: schema.postLikes,
+
+    // === Relations ===
     usersRelations: schema.usersRelations,
     guestbookRelations: schema.guestbookRelations,
     guestbookRepliesRelations: schema.guestbookRepliesRelations,
     guestbookLikesRelations: schema.guestbookLikesRelations,
     guestbookReplyLikesRelations: schema.guestbookReplyLikesRelations,
     notificationsRelations: schema.notificationsRelations,
-    
-    // Jika ada relasi lain, tambahkan di sini
+
+    // === 👇 NEW BLOG RELATIONS (Tambahkan ini) ===
+    postsRelations: schema.postsRelations,
+    postLikesRelations: schema.postLikesRelations,
   }
 });
