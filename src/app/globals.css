@@ -1,5 +1,8 @@
 @import "tailwindcss";
-@import "tw-animate-css";
+@plugin "@tailwindcss/typography";
+
+/* Load plugin dengan syntax v4 */
+@plugin "tailwindcss-animate";
 
 @custom-variant dark (&:is(.dark *));
 
