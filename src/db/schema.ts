@@ -7,7 +7,8 @@ import {
   integer,
   serial,
   varchar,
-  uuid
+  uuid,
+  json // 👈 Tambahan import
 } from "drizzle-orm/pg-core"
 import { relations } from "drizzle-orm"
 import type { AdapterAccountType } from "next-auth/adapters"
@@ -133,14 +134,17 @@ export const notifications = pgTable("notifications", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-// 👇 NEW: BLOG POSTS SCHEMA
+// 👇 UPDATED: BLOG POSTS SCHEMA (Multi Image)
 export const posts = pgTable("posts", {
   id: uuid("id").defaultRandom().primaryKey(),
   title: text("title").notNull(),
   slug: text("slug").notNull().unique(), 
   excerpt: text("excerpt").notNull(), 
   content: text("content").notNull(), 
-  coverImage: text("cover_image"), 
+  
+  // Perubahan disini: coverImage (string) -> images (json array)
+  images: json("images").$type<string[]>().default([]),
+
   tags: text("tags"), 
   isPublished: boolean("is_published").default(false), 
   viewCount: integer("view_count").default(0),
@@ -221,7 +225,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   guestbookLikes: many(guestbookLikes),
   guestbookReplyLikes: many(guestbookReplyLikes),
   notifications: many(notifications),
-  postLikes: many(postLikes), // 👈 Added: User can like many blog posts
+  postLikes: many(postLikes), 
 }));
 
 // NOTIFICATIONS
@@ -236,7 +240,7 @@ export const notificationsRelations = relations(notifications, ({ one }) => ({
   }),
 }));
 
-// 👇 NEW: BLOG RELATIONS
+// 👇 BLOG RELATIONS
 export const postsRelations = relations(posts, ({ many }) => ({
   likes: many(postLikes),
 }));

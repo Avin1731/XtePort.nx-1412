@@ -24,14 +24,14 @@ export async function createPost(formData: {
   title: string;
   excerpt: string;
   content: string;
-  coverImage?: string;
+  images: string[]; // 👈 Updated: Array of Strings
   tags?: string;
   isPublished?: boolean;
 }) {
   const session = await auth();
   
   // Cek Role (sesuai auth.ts session callback)
-  // @ts-expect-error role injected in auth.ts
+
   if (session?.user?.role !== "admin") {
     throw new Error("Unauthorized: Admin access required.");
   }
@@ -52,7 +52,7 @@ export async function createPost(formData: {
     slug: slug,
     excerpt: formData.excerpt,
     content: formData.content,
-    coverImage: formData.coverImage,
+    images: formData.images, // 👈 Insert Array JSON
     tags: formData.tags,
     isPublished: formData.isPublished || false,
   });
@@ -65,12 +65,12 @@ export async function updatePost(id: string, formData: {
     title: string;
     excerpt: string;
     content: string;
-    coverImage?: string;
+    images: string[]; // 👈 Updated: Array of Strings
     tags?: string;
     isPublished?: boolean;
 }) {
     const session = await auth();
-    // @ts-expect-error role injected in auth.ts
+
     if (session?.user?.role !== "admin") throw new Error("Unauthorized");
 
     // Kita tidak update SLUG agar link SEO tidak rusak/berubah
@@ -78,7 +78,7 @@ export async function updatePost(id: string, formData: {
         title: formData.title,
         excerpt: formData.excerpt,
         content: formData.content,
-        coverImage: formData.coverImage,
+        images: formData.images, // 👈 Update Array JSON
         tags: formData.tags,
         isPublished: formData.isPublished,
         updatedAt: new Date(),
@@ -90,7 +90,7 @@ export async function updatePost(id: string, formData: {
 
 export async function deletePost(id: string) {
     const session = await auth();
-    // @ts-expect-error role injected in auth.ts
+
     if (session?.user?.role !== "admin") throw new Error("Unauthorized");
 
     await db.delete(posts).where(eq(posts.id, id));
@@ -99,9 +99,9 @@ export async function deletePost(id: string) {
 }
 
 export async function getAllPosts() {
-    // Digunakan untuk Dashboard Admin (Menampilkan Draft & Published)
+
     const session = await auth();
-    // @ts-expect-error role injected in auth.ts
+
     if (session?.user?.role !== "admin") throw new Error("Unauthorized");
 
     return await db.select().from(posts).orderBy(desc(posts.createdAt));
