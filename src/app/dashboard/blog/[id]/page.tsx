@@ -2,11 +2,19 @@ import { db } from "@/lib/db";
 import { posts } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
-import EditPostForm from "@/components/dashboard/edit-form"; // Kita akan pisahkan form ke client component
+import EditPostForm from "@/components/dashboard/edit-form"; // Pastikan path ini sesuai lokasi file form kamu
 
-export default async function EditPostPage({ params }: { params: { id: string } }) {
+// 👇 Update Tipe Props: params adalah Promise
+export default async function EditPostPage({ 
+  params 
+}: { 
+  params: Promise<{ id: string }> 
+}) {
+  // 👇 WAJIB: Unwrapping params dengan await
+  const { id } = await params;
+
   const post = await db.query.posts.findFirst({
-    where: eq(posts.id, params.id),
+    where: eq(posts.id, id), // Gunakan variable id yang sudah di-await
   });
 
   if (!post) {

@@ -5,7 +5,6 @@ export default auth((req) => {
   const isLoggedIn = !!req.auth
   const isDashboardPage = req.nextUrl.pathname.startsWith("/dashboard")
   
-  // @ts-expect-error: custom property 'role' mungkin belum dikenali oleh TypeScript
   const isAdmin = req.auth?.user?.role === "admin"
 
   if (isDashboardPage) {

@@ -77,7 +77,7 @@ Branch: feat/dynamic-content Goal: Migrasi konten statis menjadi dinamis (Databa
 Fokus: Membangun sistem artikel dari nol (Database -> Admin -> Public).
 - [x] **DB Schema:** Membuat tabel `posts` (Title, Slug, Content, Tags, Published Status).
 - [x] **Server Actions:** Membuat `src/actions/blog.ts` untuk Create, Read, Update, Delete artikel.
-- [ ] **Admin CMS:** Membuat halaman Dashboard `/dashboard/blog` (List) dan `/dashboard/blog/new` (Editor).
+- [x] **Admin CMS:** Membuat halaman Dashboard `/dashboard/blog` (List) dan `/dashboard/blog/new` (Editor).
 - [ ] **Public Page (List):** Membuat halaman `/blog` untuk menampilkan daftar artikel terbaru dari DB.
 - [ ] **Public Page (Detail):** Membuat halaman `/blog/[slug]` untuk membaca artikel full.
 
