@@ -9,20 +9,21 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import Link from "next/link"; // Import Link
 
 interface PostCarouselProps {
   images: string[];
+  slug?: string; // 👈 Opsional: Kalau ada slug, gambar jadi Link
   aspectRatio?: "video" | "square";
   className?: string;
 }
 
-export function PostCarousel({ images, aspectRatio = "video", className }: PostCarouselProps) {
-  // Config Autoplay: Delay 4 detik
+export function PostCarousel({ images, slug, aspectRatio = "video", className }: PostCarouselProps) {
+  // Autoplay 4 detik
   const plugin = React.useRef(
     Autoplay({ delay: 4000, stopOnInteraction: true })
   );
 
-  // Jika tidak ada gambar, return null atau placeholder
   if (!images || images.length === 0) return null;
 
   return (
@@ -31,37 +32,41 @@ export function PostCarousel({ images, aspectRatio = "video", className }: PostC
       className={`w-full max-w-full group ${className}`}
       onMouseEnter={plugin.current.stop}
       onMouseLeave={plugin.current.reset}
-      opts={{
-        loop: true, // Biar muter terus
-      }}
+      opts={{ loop: true }}
     >
       <CarouselContent>
         {images.map((url, index) => (
           <CarouselItem key={index}>
             <div className={`relative w-full ${aspectRatio === "video" ? "aspect-video" : "aspect-square"} overflow-hidden rounded-xl bg-muted`}>
-               {/* eslint-disable-next-line @next/next/no-img-element */}
-               <img 
-                 src={url} 
-                 alt={`Slide ${index + 1}`} 
-                 className="object-cover w-full h-full transition-transform hover:scale-105 duration-700" 
-               />
-               
-               {/* Indikator Jumlah Gambar */}
-               {images.length > 1 && (
-                 <div className="absolute bottom-3 right-3 bg-black/60 text-white text-xs px-2 py-1 rounded-full">
-                   {index + 1} / {images.length}
-                 </div>
+               {/* Jika ada SLUG, bungkus gambar dengan Link */}
+               {slug ? (
+                 <Link href={`/blog/${slug}`} className="block w-full h-full">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img 
+                        src={url} 
+                        alt={`Slide ${index + 1}`} 
+                        className="object-cover w-full h-full transition-transform hover:scale-105 duration-700" 
+                    />
+                 </Link>
+               ) : (
+                 // Jika tidak ada slug (halaman detail), gambar biasa
+                 // eslint-disable-next-line @next/next/no-img-element
+                 <img 
+                    src={url} 
+                    alt={`Slide ${index + 1}`} 
+                    className="object-cover w-full h-full" 
+                 />
                )}
             </div>
           </CarouselItem>
         ))}
       </CarouselContent>
       
-      {/* Tampilkan tombol navigasi hanya jika gambar > 1 */}
+      {/* Tombol Panah Kanan Kiri (Selalu Muncul jika > 1 gambar) */}
       {images.length > 1 && (
         <>
-          <CarouselPrevious className="left-2 opacity-0 group-hover:opacity-100 transition-opacity" />
-          <CarouselNext className="right-2 opacity-0 group-hover:opacity-100 transition-opacity" />
+          <CarouselPrevious className="left-2 opacity-0 group-hover:opacity-100 transition-opacity z-10" />
+          <CarouselNext className="right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10" />
         </>
       )}
     </Carousel>

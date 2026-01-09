@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 /* Load plugin dengan syntax v4 */
 @plugin "tailwindcss-animate";
