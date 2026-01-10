@@ -3,7 +3,7 @@
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import { posts, postLikes } from "@/db/schema";
-import { desc, eq, and, count } from "drizzle-orm";
+import { desc, eq, and, count, ilike } from "drizzle-orm"; // 👈 Tambah ilike
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 
@@ -83,7 +83,6 @@ export async function updatePost(id: string, formData: {
     isPublished?: boolean;
 }) {
     const session = await auth();
-
     if (session?.user?.role !== "admin") throw new Error("Unauthorized");
 
     await db.update(posts).set({
@@ -102,7 +101,6 @@ export async function updatePost(id: string, formData: {
 
 export async function deletePost(id: string) {
     const session = await auth();
-
     if (session?.user?.role !== "admin") throw new Error("Unauthorized");
 
     await db.delete(posts).where(eq(posts.id, id));
@@ -112,21 +110,25 @@ export async function deletePost(id: string) {
 
 export async function getAllPosts() {
     const session = await auth();
-
     if (session?.user?.role !== "admin") throw new Error("Unauthorized");
 
     return await db.select().from(posts).orderBy(desc(posts.createdAt));
 }
 
 // ==========================================
-// 🌍 PUBLIC ACTIONS
+// 🌍 PUBLIC ACTIONS (UPDATED: TAG FILTER)
 // ==========================================
 
-export async function getPublishedPosts(page: number = 1, limit: number = 6) {
+export async function getPublishedPosts(page: number = 1, limit: number = 6, tag?: string) {
     const offset = (page - 1) * limit;
 
+    // 👇 Logic Filter: Jika ada tag, cari yang mengandung text tag tersebut (ilike)
+    const whereCondition = tag 
+        ? and(eq(posts.isPublished, true), ilike(posts.tags, `%${tag}%`))
+        : eq(posts.isPublished, true);
+
     const rawData = await db.query.posts.findMany({
-        where: eq(posts.isPublished, true),
+        where: whereCondition, 
         orderBy: desc(posts.createdAt),
         limit: limit,
         offset: offset,
@@ -141,9 +143,10 @@ export async function getPublishedPosts(page: number = 1, limit: number = 6) {
         images: normalizeImages(post.images)
     }));
     
+    // Hitung Total (harus difilter juga agar pagination akurat)
     const totalPosts = await db.select({ count: count() })
         .from(posts)
-        .where(eq(posts.isPublished, true));
+        .where(whereCondition);
         
     const total = totalPosts[0].count;
     const totalPages = Math.ceil(total / limit);
@@ -169,7 +172,7 @@ export async function getPostBySlug(slug: string) {
 
     if (!post) return null;
 
-    // Return data bersih (View count dipindah ke incrementPostView)
+    // Return data bersih
     return {
         ...post,
         images: normalizeImages(post.images)

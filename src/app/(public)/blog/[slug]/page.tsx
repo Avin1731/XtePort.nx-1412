@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar, Clock, Eye, ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { PostCarousel } from "@/components/dashboard/PostCarousel"; // Pastikan path ini benar
+import { PostCarousel } from "@/components/dashboard/PostCarousel"; 
 import ReactMarkdown from "react-markdown";
 import { auth } from "@/auth";
 import { ViewCounter } from "@/components/dashboard/view-counter";
@@ -52,8 +52,13 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
       <div className="space-y-4 mb-8">
         <div className="flex flex-wrap gap-2">
+            {/* 👇 Loop tags jadi Link agar bisa difilter */}
             {post.tags?.split(',').map((tag, i) => (
-                <Badge key={i} variant="secondary">{tag.trim()}</Badge>
+                <Link key={i} href={`/blog?tag=${tag.trim()}`}>
+                    <Badge variant="secondary" className="hover:bg-secondary/80 cursor-pointer transition-colors">
+                        {tag.trim()}
+                    </Badge>
+                </Link>
             ))}
         </div>
         
