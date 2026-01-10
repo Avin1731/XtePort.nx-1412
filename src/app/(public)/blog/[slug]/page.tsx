@@ -1,13 +1,15 @@
-import { getPostBySlug } from "@/actions/blog";
+import { getPostBySlug, getLikeStatus } from "@/actions/blog";
 import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Clock, Eye, ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { PostCarousel } from "@/components/dashboard/PostCarousel"; // Import Carousel yang benar
+import { PostCarousel } from "@/components/dashboard/PostCarousel"; 
 import ReactMarkdown from "react-markdown";
+import { auth } from "@/auth";
+import { ViewCounter } from "@/components/dashboard/view-counter";
+import { LikeButton } from "@/components/dashboard/like-button";
 
-// Generate Metadata untuk SEO
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
     const post = await getPostBySlug(slug);
@@ -17,14 +19,14 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
         title: post.title,
         description: post.excerpt,
         openGraph: {
-            images: Array.isArray(post.images) && post.images.length > 0 ? [post.images[0]] : [],
+            images: post.images.length > 0 ? [post.images[0]] : [],
         }
     };
 }
 
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
-  // Await params (Next.js 15/16 requirement)
   const { slug } = await params;
+  const session = await auth();
   
   const post = await getPostBySlug(slug);
 
@@ -32,16 +34,14 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     notFound();
   }
 
-  // Pastikan images adalah array
-  const images = Array.isArray(post.images) 
-    ? (post.images as string[]) 
-    : typeof post.images === 'string' 
-        ? [post.images] 
-        : [];
+  // Ambil status Like user
+  const { hasLiked, likesCount } = await getLikeStatus(post.id);
 
   return (
     <article className="container mx-auto px-4 py-10 max-w-4xl">
-      {/* Back Button */}
+      {/* TRIGGER VIEW COUNT (Invisible & Smart Cookie Check) */}
+      <ViewCounter slug={slug} />
+
       <div className="mb-6">
         <Link href="/blog">
           <Button variant="ghost" size="sm" className="-ml-4 text-muted-foreground">
@@ -50,11 +50,15 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
         </Link>
       </div>
 
-      {/* Header */}
       <div className="space-y-4 mb-8">
         <div className="flex flex-wrap gap-2">
+            {/* 👇 Loop tags jadi Link agar bisa difilter */}
             {post.tags?.split(',').map((tag, i) => (
-                <Badge key={i} variant="secondary">{tag.trim()}</Badge>
+                <Link key={i} href={`/blog?tag=${tag.trim()}`}>
+                    <Badge variant="secondary" className="hover:bg-secondary/80 cursor-pointer transition-colors">
+                        {tag.trim()}
+                    </Badge>
+                </Link>
             ))}
         </div>
         
@@ -62,29 +66,38 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             {post.title}
         </h1>
 
-        <div className="flex items-center gap-4 text-sm text-muted-foreground border-b pb-8">
-            <div className="flex items-center gap-1">
-                <Calendar className="w-4 h-4" />
-                <span>{new Date(post.createdAt).toLocaleDateString()}</span>
+        <div className="flex flex-wrap items-center justify-between gap-4 border-b pb-8">
+            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                <div className="flex items-center gap-1">
+                    <Calendar className="w-4 h-4" />
+                    <span>{new Date(post.createdAt).toLocaleDateString()}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                    <Eye className="w-4 h-4" />
+                    <span>{post.viewCount} views</span>
+                </div>
+                <div className="flex items-center gap-1">
+                    <Clock className="w-4 h-4" />
+                    <span>{Math.max(1, Math.ceil(post.content.length / 1000))} min read</span>
+                </div>
             </div>
-            <div className="flex items-center gap-1">
-                <Eye className="w-4 h-4" />
-                <span>{post.viewCount} views</span>
-            </div>
-             {/* Hitung estimasi baca (200 kata/menit) */}
-            <div className="flex items-center gap-1">
-                <Clock className="w-4 h-4" />
-                <span>{Math.ceil(post.content.length / 1000)} min read</span>
-            </div>
+
+            {/* LIKE BUTTON INTERAKTIF */}
+            <LikeButton 
+                postId={post.id} 
+                initialLiked={hasLiked} 
+                initialCount={likesCount} 
+                isLoggedIn={!!session?.user} 
+            />
         </div>
       </div>
 
       {/* CAROUSEL GALLERY */}
-      {images.length > 0 && (
+      {post.images.length > 0 && (
         <div className="mb-10">
-            <PostCarousel images={images} aspectRatio="video" />
+            <PostCarousel images={post.images} aspectRatio="video" />
             <p className="text-center text-sm text-muted-foreground mt-2 italic">
-                {images.length > 1 ? "Swipe or use arrows to see more photos" : "Article Cover"}
+                {post.images.length > 1 ? "Swipe or use arrows to see more photos" : "Article Cover"}
             </p>
         </div>
       )}

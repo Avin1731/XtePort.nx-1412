@@ -19,15 +19,18 @@ export default function EditPostForm({ post }: { post: Post }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
-  // Initialize Images
+  // Initialize Images (Safe Mode)
   const [images, setImages] = useState<string[]>(() => {
-    if (Array.isArray(post.images)) return post.images;
-    if (typeof post.images === "string") {
+    const rawImages = post.images as unknown; // 👈 FIX: Cast ke unknown dulu biar TS ga marah
+    
+    if (Array.isArray(rawImages)) return rawImages as string[];
+    
+    if (typeof rawImages === "string") {
       try {
-        const parsed = JSON.parse(post.images);
+        const parsed = JSON.parse(rawImages);
         return Array.isArray(parsed) ? parsed : [];
       } catch {
-        return post.images ? [post.images] : [];
+        return rawImages ? [rawImages] : [];
       }
     }
     return [];
@@ -94,6 +97,8 @@ export default function EditPostForm({ post }: { post: Post }) {
     setLoading(true);
 
     const formData = new FormData(event.currentTarget);
+    
+    // Construct object data sesuai Server Action
     const data = {
       title: formData.get("title") as string,
       excerpt: formData.get("excerpt") as string,
@@ -124,12 +129,11 @@ export default function EditPostForm({ post }: { post: Post }) {
           <Input name="title" defaultValue={post.title} required />
         </div>
 
-        {/* 👇 UI GALLERY UPLOADER (Updated: File & URL Support) */}
+        {/* GALLERY UPLOADER */}
         <div className="space-y-3 p-4 border rounded-xl bg-muted/20">
             <div className="flex items-center justify-between mb-2">
                 <Label>Gallery ({images.length} images)</Label>
                 
-                {/* Toggle Mode */}
                 <div className="flex bg-background border rounded-lg p-1 gap-1">
                     <Button 
                         type="button" 
@@ -164,7 +168,6 @@ export default function EditPostForm({ post }: { post: Post }) {
                     </div>
                 ))}
 
-                {/* Input Area (Dynamic) */}
                 {uploadMode === "file" ? (
                     <div 
                         onClick={() => !isUploading && fileInputRef.current?.click()}
@@ -199,7 +202,7 @@ export default function EditPostForm({ post }: { post: Post }) {
 
         <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-                <Label>Excerpt</Label> <Textarea name="excerpt" defaultValue={post.excerpt || ""} className="h-24" required />
+                <Label>Excerpt</Label> <Textarea name="excerpt" defaultValue={post.excerpt} className="h-24" required />
             </div>
             <div className="space-y-2">
                 <Label>Tags</Label> <Input name="tags" defaultValue={post.tags || ""} />

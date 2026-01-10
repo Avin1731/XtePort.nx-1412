@@ -1,4 +1,4 @@
-import { getAllPosts, deletePost } from "@/actions/blog";
+import { getAllPosts } from "@/actions/blog";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -9,8 +9,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Eye, Plus, Trash2, Edit } from "lucide-react";
+import { Eye, Plus, Edit } from "lucide-react";
 import Link from "next/link";
+// 👇 Import komponen Client Button yang baru dibuat
+import { DeletePostButton } from "@/components/dashboard/delete-post-button";
 
 export default async function BlogDashboardPage() {
   const posts = await getAllPosts();
@@ -77,6 +79,8 @@ export default async function BlogDashboardPage() {
                   <TableCell className="text-muted-foreground text-sm">
                     {new Date(post.createdAt).toLocaleDateString()}
                   </TableCell>
+                  
+                  {/* 👇 BAGIAN ACTION SUDAH BERSIH DARI FORM */}
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
                       <Link href={`/dashboard/blog/${post.id}`}>
@@ -85,14 +89,9 @@ export default async function BlogDashboardPage() {
                         </Button>
                       </Link>
                       
-                      <form action={async () => {
-                        "use server";
-                        await deletePost(post.id);
-                      }}>
-                        <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600 hover:bg-red-50">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </form>
+                      {/* Langsung panggil komponen dengan postId */}
+                      <DeletePostButton postId={post.id} />
+                      
                     </div>
                   </TableCell>
                 </TableRow>
