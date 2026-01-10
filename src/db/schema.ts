@@ -8,7 +8,7 @@ import {
   serial,
   varchar,
   uuid,
-  json // 👈 Tambahan import
+  json
 } from "drizzle-orm/pg-core"
 import { relations } from "drizzle-orm"
 import type { AdapterAccountType } from "next-auth/adapters"
@@ -134,17 +134,14 @@ export const notifications = pgTable("notifications", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-// 👇 UPDATED: BLOG POSTS SCHEMA (Multi Image)
+// 👇 BLOG POSTS SCHEMA
 export const posts = pgTable("posts", {
   id: uuid("id").defaultRandom().primaryKey(),
   title: text("title").notNull(),
   slug: text("slug").notNull().unique(), 
   excerpt: text("excerpt").notNull(), 
   content: text("content").notNull(), 
-  
-  // Perubahan disini: coverImage (string) -> images (json array)
   images: json("images").$type<string[]>().default([]),
-
   tags: text("tags"), 
   isPublished: boolean("is_published").default(false), 
   viewCount: integer("view_count").default(0),
@@ -152,14 +149,14 @@ export const posts = pgTable("posts", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-// 👇 NEW: BLOG LIKES SCHEMA
+// 👇 BLOG LIKES SCHEMA
 export const postLikes = pgTable(
   "post_likes",
   {
     postId: uuid("post_id")
       .notNull()
       .references(() => posts.id, { onDelete: "cascade" }),
-    userId: text("user_id") // References Auth.js User ID (Text)
+    userId: text("user_id") 
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
     createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -218,29 +215,37 @@ export const guestbookReplyLikesRelations = relations(guestbookReplyLikes, ({ on
   }),
 }));
 
-// USERS
+// USERS - 🔥 FIX DI SINI (relationName)
 export const usersRelations = relations(users, ({ many }) => ({
   guestbooks: many(guestbook),
   guestbookReplies: many(guestbookReplies),
   guestbookLikes: many(guestbookLikes),
   guestbookReplyLikes: many(guestbookReplyLikes),
-  notifications: many(notifications),
+  
+  // Kita beri nama khusus agar Drizzle tau ini relasi ke 'userId' (Penerima)
+  notifications: many(notifications, { relationName: "user_notifications" }),
+  
   postLikes: many(postLikes), 
 }));
 
-// NOTIFICATIONS
+// NOTIFICATIONS - 🔥 FIX DI SINI (relationName)
 export const notificationsRelations = relations(notifications, ({ one }) => ({
+  // Relasi ke User Penerima (userId) -> Pakai nama yg sama: "user_notifications"
   user: one(users, {
     fields: [notifications.userId],
     references: [users.id],
+    relationName: "user_notifications", 
   }),
+  
+  // Relasi ke User Pengirim (triggerUserId) -> Pakai nama beda: "user_triggered_notifications"
   triggerUser: one(users, {
     fields: [notifications.triggerUserId],
     references: [users.id],
+    relationName: "user_triggered_notifications",
   }),
 }));
 
-// 👇 BLOG RELATIONS
+// BLOG RELATIONS
 export const postsRelations = relations(posts, ({ many }) => ({
   likes: many(postLikes),
 }));

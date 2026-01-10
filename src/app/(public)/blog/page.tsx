@@ -2,15 +2,16 @@ import { getPublishedPosts } from "@/actions/blog";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Eye, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
-import { PostCarousel } from "@/components/dashboard/PostCarousel";
+import { PostCarousel } from "@/components/dashboard/PostCarousel"; 
 import { Button } from "@/components/ui/button";
+import { auth } from "@/auth"; 
+import { LikeButton } from "@/components/dashboard/like-button"; 
 
 export const metadata = {
   title: "Blog - My Awesome Project",
   description: "Read our latest articles and tutorials.",
 };
 
-// Menerima SearchParams untuk Pagination (?page=1)
 export default async function BlogListPage({
   searchParams,
 }: {
@@ -18,7 +19,9 @@ export default async function BlogListPage({
 }) {
   const params = await searchParams;
   const currentPage = Number(params.page) || 1;
-  const limit = 6; // Jumlah artikel per halaman
+  const limit = 6; 
+
+  const session = await auth(); 
 
   const { data: posts, metadata } = await getPublishedPosts(currentPage, limit);
 
@@ -38,22 +41,21 @@ export default async function BlogListPage({
       ) : (
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
           {posts.map((post) => {
-            // Normalisasi Images
-            const images = Array.isArray(post.images) 
-                ? (post.images as string[]) 
-                : typeof post.images === 'string' 
-                    ? [post.images] 
-                    : [];
+            // 👇 FIX: Ganti 'any' jadi '{ userId: string }'
+            const likesCount = post.likes.length;
+            const hasLiked = session?.user?.id 
+                ? post.likes.some((like: { userId: string }) => like.userId === session.user.id)
+                : false;
 
             return (
               <div 
                 key={post.id} 
                 className="flex flex-col bg-card border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow"
               >
-                {/* 1. CAROUSEL AREA (Dengan Slug agar bisa diklik) */}
+                {/* 1. CAROUSEL AREA */}
                 <div className="w-full">
-                    {images.length > 0 ? (
-                        <PostCarousel images={images} slug={post.slug} />
+                    {post.images.length > 0 ? (
+                        <PostCarousel images={post.images} slug={post.slug} />
                     ) : (
                         <div className="aspect-video w-full bg-muted flex items-center justify-center text-muted-foreground">
                             No Image
@@ -63,23 +65,36 @@ export default async function BlogListPage({
 
                 {/* 2. CONTENT AREA */}
                 <div className="flex flex-col flex-1 p-6 relative">
-                  {/* Tags Melayang sedikit ke atas */}
+                  {/* Tags Melayang */}
                   {post.tags && (
-                     <div className="-mt-9 mb-3">
+                     <div className="-mt-9 mb-3 flex justify-between items-end">
                        <Badge className="shadow-sm">
                          {post.tags.split(',')[0]}
                        </Badge>
                      </div>
                   )}
 
-                  <div className="flex items-center gap-4 text-xs text-muted-foreground mb-3">
-                    <div className="flex items-center gap-1">
-                      <Calendar className="w-3 h-3" />
-                      {new Date(post.createdAt).toLocaleDateString()}
+                  {/* Metadata Row: Date, Views, Likes */}
+                  <div className="flex items-center justify-between text-xs text-muted-foreground mb-3">
+                    <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-1">
+                            <Calendar className="w-3 h-3" />
+                            {new Date(post.createdAt).toLocaleDateString()}
+                        </div>
+                        <div className="flex items-center gap-1">
+                            <Eye className="w-3 h-3" />
+                            {post.viewCount}
+                        </div>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <Eye className="w-3 h-3" />
-                      {post.viewCount} views
+
+                    {/* Tombol Like */}
+                    <div className="transform scale-90 origin-right"> 
+                        <LikeButton 
+                            postId={post.id} 
+                            initialLiked={hasLiked} 
+                            initialCount={likesCount} 
+                            isLoggedIn={!!session?.user}
+                        />
                     </div>
                   </div>
 
@@ -104,7 +119,7 @@ export default async function BlogListPage({
         </div>
       )}
 
-      {/* PAGINATION CONTROLS */}
+      {/* PAGINATION */}
       {posts.length > 0 && (metadata.hasPrevPage || metadata.hasNextPage) && (
         <div className="flex justify-center gap-2 mt-12">
             <Link href={`/blog?page=${metadata.currentPage - 1}`} className={!metadata.hasPrevPage ? "pointer-events-none" : ""}>
