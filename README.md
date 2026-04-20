@@ -94,8 +94,13 @@ Fokus: Menghapus dummy data di halaman Projects dan menghubungkannya ke DB yang 
 - [x] **Data Fetching:** Render data memakai server action `getPublicProjects()` dengan `db.query.projects.findMany()`.
 - [x] **Final Check:** Card project, fallback image, dan link demo/repo sudah tampil dari database.
 
-#### D. Optional Enhancements
-- [ ] **Global Search:** Pencarian sederhana untuk memfilter Blog dan Projects sekaligus.
+#### D. Global Search Engine (Fourth Priority)
+Fokus: Menjadikan pencarian lintas konten sebagai fitur resmi sebelum masuk ke tahap Polish & SEO.
+- [ ] **Search Contract:** Standarisasi query parameter `q` untuk halaman `/blog` dan `/projects`.
+- [ ] **Server Actions:** Tambahkan keyword search di `src/actions/blog.ts` dan `src/actions/projects.ts` berbasis `ilike`.
+- [ ] **Public UI:** Integrasikan Search Bar reusable pada halaman publik Blog dan Projects.
+- [ ] **Search UX:** Tampilkan result count, empty-state, clear filter, dan persist query pada pagination.
+- [ ] **Final Check:** Pastikan hasil pencarian lintas konten konsisten, URL shareable, dan performa tetap aman.
 
 ### ✨ Phase 9: Polish & SEO
 Branch: feat/polish-seo Goal: Finishing touches, SEO, dan performa sebelum rilis.

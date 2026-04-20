@@ -127,11 +127,21 @@ Temuan:
   - Query menggunakan db.query.projects.findMany() dengan urutan terbaru
   - revalidatePath("/projects") sudah dipasang pada create/delete project
 
-### 8D. Optional Enhancements (Global Search)
-Status: Belum mulai
+### 8D. Global Search Engine (Fourth Priority)
+Status: Belum mulai (sudah diprioritaskan sebagai fitur berikutnya)
 
-Temuan:
-- Belum ditemukan implementasi fitur pencarian global blog + projects
+Temuan audit codebase:
+- Belum ada komponen Search Bar reusable lintas halaman publik.
+- Halaman blog saat ini mendukung filter tag, belum keyword query `q`.
+- Halaman projects saat ini belum menerima `searchParams` untuk keyword.
+- Belum ada search contract lintas blog + projects pada server actions.
+
+Rencana implementasi 8D:
+1. Standarisasi query parameter `q` untuk `/blog` dan `/projects`.
+2. Tambahkan keyword search berbasis `ilike` pada `src/actions/blog.ts` dan `src/actions/projects.ts`.
+3. Tambahkan Search Bar reusable untuk halaman publik.
+4. Lengkapi UX pencarian: result count, empty-state, clear filter, dan persist query.
+5. Validasi hasil lintas konten serta pastikan URL pencarian shareable.
 
 ## Phase 9: Polish and SEO
 Status: Belum mulai
@@ -168,7 +178,8 @@ Tujuan bagian ini: memberi urutan eksekusi paling aman, paling konsisten, dan pa
 Update terakhir implementasi:
 1. Prioritas 1 (P0) selesai pada 20 April 2026.
 2. Prioritas 2 (P1) selesai pada 20 April 2026.
-3. Fokus aktif berikutnya: Prioritas 3 (P2) - Polish and SEO Baseline.
+3. Fokus aktif berikutnya: Prioritas 3 (P2) - Global Search Engine (Phase 8D).
+4. Prioritas Polish & SEO digeser setelah 8D selesai.
 
 Prinsip konsistensi (harga mati):
 1. Semua perubahan schema tetap terpusat di src/db/schema.ts.
@@ -250,7 +261,36 @@ Definition of Done:
 3. Home About section sinkron dengan profile data dan tidak merusak layout lama.
 4. Tidak ada efek samping ke auth flow, dashboard layout, dan halaman public lain.
 
-### Prioritas 3 (P2) - Polish and SEO Baseline (Phase 9 Awal)
+### Prioritas 3 (P2) - Implement Global Search Engine (Phase 8D)
+
+Status: Planned (next active feature)
+
+Alasan prioritas:
+1. Phase 8 masih menjadi fokus branch aktif, jadi fitur 8D perlu diselesaikan sebelum masuk Phase 9.
+2. Blog dan Projects sudah dinamis dari DB, sehingga fondasi pencarian lintas konten sudah siap.
+3. Global search akan meningkatkan navigasi konten user-facing secara langsung.
+
+Target implementasi:
+1. Terapkan query parameter `q` sebagai kontrak tunggal pencarian.
+2. Tambahkan keyword search pada server action blog dan projects berbasis `ilike`.
+3. Tampilkan Search Bar reusable di halaman Blog dan Projects.
+4. Pastikan pagination/filter tetap membawa query pencarian.
+5. Tambahkan empty-state + result count untuk UX yang jelas.
+
+Teknik kerja detail (konsisten dengan codebase):
+1. Pertahankan pola server actions untuk data access; hindari query langsung dari client component.
+2. Ikuti pola `searchParams` yang sudah dipakai di halaman blog/guestbook.
+3. Jangan ubah struktur data existing; tambahkan parameter opsional agar backward-compatible.
+4. Gunakan komponen UI existing untuk input dan kontrol aksi (input, button, badge).
+5. Setelah mutasi/perubahan relevan, tetap pastikan cache/path behavior tidak regress.
+
+Definition of Done:
+1. User bisa mencari keyword dari halaman Blog dan Projects menggunakan parameter `q`.
+2. Hasil pencarian konsisten antara data source dan tampilan kartu/list.
+3. URL hasil pencarian dapat dibagikan dan menghasilkan state yang sama saat dibuka ulang.
+4. Empty-state dan clear filter tersedia pada kedua halaman.
+
+### Prioritas 4 (P3) - Polish and SEO Baseline (Phase 9 Awal)
 
 Alasan prioritas:
 1. Dikerjakan setelah konten dinamis utama selesai agar tidak kerja dua kali.
@@ -277,7 +317,8 @@ Definition of Done:
 
 1. Prioritas 1 (P0) sudah selesai dan terverifikasi.
 2. Prioritas 2 (P1) sudah selesai dan terverifikasi.
-3. Fokus aktif berikutnya: Prioritas 3 (P2) untuk quality pass sebelum masuk fase ekspansi.
+3. Fokus aktif berikutnya: Prioritas 3 (P2) untuk menyelesaikan fitur Global Search (8D).
+4. Lanjut Prioritas 4 (P3) untuk quality pass sebelum masuk fase ekspansi.
 
 Urutan ini dipilih agar perbaikan berjalan bertahap, konsisten dengan struktur codebase yang sudah ada, dan minim risiko bongkar ulang.
 
