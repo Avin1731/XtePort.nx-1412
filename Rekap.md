@@ -128,20 +128,16 @@ Temuan:
   - revalidatePath("/projects") sudah dipasang pada create/delete project
 
 ### 8D. Global Search Engine (Fourth Priority)
-Status: Belum mulai (sudah diprioritaskan sebagai fitur berikutnya)
+Status: Selesai (terverifikasi)
 
-Temuan audit codebase:
-- Belum ada komponen Search Bar reusable lintas halaman publik.
-- Halaman blog saat ini mendukung filter tag, belum keyword query `q`.
-- Halaman projects saat ini belum menerima `searchParams` untuk keyword.
-- Belum ada search contract lintas blog + projects pada server actions.
-
-Rencana implementasi 8D:
-1. Standarisasi query parameter `q` untuk `/blog` dan `/projects`.
-2. Tambahkan keyword search berbasis `ilike` pada `src/actions/blog.ts` dan `src/actions/projects.ts`.
-3. Tambahkan Search Bar reusable untuk halaman publik.
-4. Lengkapi UX pencarian: result count, empty-state, clear filter, dan persist query.
-5. Validasi hasil lintas konten serta pastikan URL pencarian shareable.
+Temuan implementasi:
+- Search contract `q` sudah aktif di halaman blog dan projects.
+- Server action blog sudah mendukung kombinasi filter tag + keyword (`ilike`) pada src/actions/blog.ts.
+- Server action projects sudah mendukung keyword search (`ilike`) pada src/actions/projects.ts.
+- Search Bar reusable lintas konten sudah tersedia di src/components/search/content-search-form.tsx.
+- Halaman blog sudah mendukung result count, clear filter, dan persist query saat pagination.
+- Halaman projects sudah mendukung result count, empty-state pencarian, dan clear search.
+- Type-check akhir implementasi bersih (`tsc --noEmit`).
 
 ## Phase 9: Polish and SEO
 Status: Belum mulai
@@ -168,7 +164,6 @@ Sudah ada dan berjalan:
 - Profile/About engine sudah live (schema, actions, dashboard, public page)
 
 Belum selesai atau belum ada:
-- Global search
 - Polish SEO dan fase future expansion
 
 ## 5. Prioritas Lanjutan (Disarankan)
@@ -178,8 +173,8 @@ Tujuan bagian ini: memberi urutan eksekusi paling aman, paling konsisten, dan pa
 Update terakhir implementasi:
 1. Prioritas 1 (P0) selesai pada 20 April 2026.
 2. Prioritas 2 (P1) selesai pada 20 April 2026.
-3. Fokus aktif berikutnya: Prioritas 3 (P2) - Global Search Engine (Phase 8D).
-4. Prioritas Polish & SEO digeser setelah 8D selesai.
+3. Prioritas 3 (P2) selesai pada 20 April 2026.
+4. Fokus aktif berikutnya: Prioritas 4 (P3) - Polish and SEO Baseline.
 
 Prinsip konsistensi (harga mati):
 1. Semua perubahan schema tetap terpusat di src/db/schema.ts.
@@ -263,7 +258,15 @@ Definition of Done:
 
 ### Prioritas 3 (P2) - Implement Global Search Engine (Phase 8D)
 
-Status: Planned (next active feature)
+Status: Selesai (20 April 2026)
+
+Ringkasan hasil implementasi:
+1. Menambahkan kontrak query `q` pada halaman `/blog` dan `/projects`.
+2. Menambahkan keyword filtering `ilike` pada server action blog dan projects.
+3. Menambahkan komponen Search Bar reusable: src/components/search/content-search-form.tsx.
+4. Mengintegrasikan search UI di halaman blog dan projects.
+5. Menambahkan result count, empty-state, clear filter, dan query persistence pada pagination blog.
+6. Memverifikasi implementasi melalui type-check penuh tanpa error.
 
 Alasan prioritas:
 1. Phase 8 masih menjadi fokus branch aktif, jadi fitur 8D perlu diselesaikan sebelum masuk Phase 9.
@@ -317,8 +320,8 @@ Definition of Done:
 
 1. Prioritas 1 (P0) sudah selesai dan terverifikasi.
 2. Prioritas 2 (P1) sudah selesai dan terverifikasi.
-3. Fokus aktif berikutnya: Prioritas 3 (P2) untuk menyelesaikan fitur Global Search (8D).
-4. Lanjut Prioritas 4 (P3) untuk quality pass sebelum masuk fase ekspansi.
+3. Prioritas 3 (P2) sudah selesai dan terverifikasi.
+4. Fokus aktif berikutnya: Prioritas 4 (P3) untuk quality pass sebelum masuk fase ekspansi.
 
 Urutan ini dipilih agar perbaikan berjalan bertahap, konsisten dengan struktur codebase yang sudah ada, dan minim risiko bongkar ulang.
 

@@ -96,11 +96,11 @@ Fokus: Menghapus dummy data di halaman Projects dan menghubungkannya ke DB yang 
 
 #### D. Global Search Engine (Fourth Priority)
 Fokus: Menjadikan pencarian lintas konten sebagai fitur resmi sebelum masuk ke tahap Polish & SEO.
-- [ ] **Search Contract:** Standarisasi query parameter `q` untuk halaman `/blog` dan `/projects`.
-- [ ] **Server Actions:** Tambahkan keyword search di `src/actions/blog.ts` dan `src/actions/projects.ts` berbasis `ilike`.
-- [ ] **Public UI:** Integrasikan Search Bar reusable pada halaman publik Blog dan Projects.
-- [ ] **Search UX:** Tampilkan result count, empty-state, clear filter, dan persist query pada pagination.
-- [ ] **Final Check:** Pastikan hasil pencarian lintas konten konsisten, URL shareable, dan performa tetap aman.
+- [x] **Search Contract:** Query parameter `q` sudah distandarkan pada halaman `/blog` dan `/projects`.
+- [x] **Server Actions:** Keyword search di `src/actions/blog.ts` dan `src/actions/projects.ts` sudah aktif berbasis `ilike`.
+- [x] **Public UI:** Search Bar reusable sudah terintegrasi pada halaman publik Blog dan Projects.
+- [x] **Search UX:** Result count, empty-state, clear filter, dan persist query pada pagination sudah berjalan.
+- [x] **Final Check:** Hasil pencarian lintas konten sudah konsisten, URL shareable, dan type-check aman.
 
 ### ✨ Phase 9: Polish & SEO
 Branch: feat/polish-seo Goal: Finishing touches, SEO, dan performa sebelum rilis.
