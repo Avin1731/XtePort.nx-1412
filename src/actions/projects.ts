@@ -2,7 +2,7 @@
 
 import { db } from "@/lib/db";
 import { projects } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 export async function createProject(formData: FormData) {
@@ -24,10 +24,18 @@ export async function createProject(formData: FormData) {
   });
 
   revalidatePath("/dashboard/projects");
+  revalidatePath("/projects");
 }
 
 export async function deleteProject(id: string) {
   // ID di schema adalah text/uuid, jadi parameter harus string
   await db.delete(projects).where(eq(projects.id, id));
   revalidatePath("/dashboard/projects");
+  revalidatePath("/projects");
+}
+
+export async function getPublicProjects() {
+  return db.query.projects.findMany({
+    orderBy: desc(projects.createdAt),
+  });
 }

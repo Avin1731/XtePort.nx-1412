@@ -77,6 +77,30 @@ export const projects = pgTable("projects", {
   createdAt: timestamp("created_at").defaultNow(),
 })
 
+export const profile = pgTable("profile", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  fullName: text("full_name"),
+  headline: text("headline"),
+  bio: text("bio").notNull().default(""),
+  avatarUrl: text("avatar_url"),
+  location: text("location"),
+  cvUrl: text("cv_url"),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+})
+
+export const experience = pgTable("experience", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  profileId: text("profile_id").notNull().references(() => profile.id, { onDelete: "cascade" }),
+  company: text("company").notNull(),
+  role: text("role").notNull(),
+  description: text("description"),
+  startDate: timestamp("start_date", { mode: "date" }).notNull(),
+  endDate: timestamp("end_date", { mode: "date" }),
+  isCurrent: boolean("is_current").default(false).notNull(),
+  sortOrder: integer("sort_order").default(0).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+})
+
 export const techStack = pgTable("tech_stack", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   name: text("name").notNull(),
@@ -258,5 +282,16 @@ export const postLikesRelations = relations(postLikes, ({ one }) => ({
   user: one(users, {
     fields: [postLikes.userId],
     references: [users.id],
+  }),
+}));
+
+export const profileRelations = relations(profile, ({ many }) => ({
+  experiences: many(experience),
+}));
+
+export const experienceRelations = relations(experience, ({ one }) => ({
+  profile: one(profile, {
+    fields: [experience.profileId],
+    references: [profile.id],
   }),
 }));

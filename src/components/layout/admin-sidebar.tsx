@@ -14,7 +14,8 @@ import {
   Moon,
   Sun,
   Mail,
-  PenTool // 👈 IMPORT ICON BARU
+  PenTool,
+  UserRound // 👈 IMPORT ICON BARU
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -37,6 +38,7 @@ export function AdminSidebar({ user, counts = { messages: 0, guestbook: 0 }, onC
     { title: "Home Website", href: "/", icon: Home }, 
     { title: "Overview", href: "/dashboard", icon: LayoutDashboard },
     { title: "Blog Posts", href: "/dashboard/blog", icon: PenTool }, // 👈 MENU BARU
+    { title: "Profile", href: "/dashboard/profile", icon: UserRound },
     { title: "Projects", href: "/dashboard/projects", icon: FolderOpen },
     { title: "Tech Stack", href: "/dashboard/tech", icon: Layers },
     { title: "Guestbook", href: "/dashboard/guestbook", icon: MessageSquare },
