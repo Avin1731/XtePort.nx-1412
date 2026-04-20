@@ -2,7 +2,7 @@
 
 import { db } from "@/lib/db";
 import { projects } from "@/db/schema";
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, ilike, or } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 export async function createProject(formData: FormData) {
@@ -34,8 +34,17 @@ export async function deleteProject(id: string) {
   revalidatePath("/projects");
 }
 
-export async function getPublicProjects() {
+export async function getPublicProjects(query?: string) {
+  const normalizedQuery = query?.trim();
+
   return db.query.projects.findMany({
+    where: normalizedQuery
+      ? or(
+          ilike(projects.title, `%${normalizedQuery}%`),
+          ilike(projects.description, `%${normalizedQuery}%`),
+          ilike(projects.techStack, `%${normalizedQuery}%`)
+        )
+      : undefined,
     orderBy: desc(projects.createdAt),
   });
 }

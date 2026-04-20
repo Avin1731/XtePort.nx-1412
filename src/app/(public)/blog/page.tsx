@@ -6,26 +6,65 @@ import { PostCarousel } from "@/components/dashboard/PostCarousel";
 import { Button } from "@/components/ui/button";
 import { auth } from "@/auth"; 
 import { LikeButton } from "@/components/dashboard/like-button"; 
+import { ContentSearchForm } from "@/components/search/content-search-form";
 
 export const metadata = {
   title: "Blog - My Awesome Project",
   description: "Read our latest articles and tutorials.",
 };
 
+function buildBlogHref({
+  page,
+  tag,
+  q,
+}: {
+  page?: number;
+  tag?: string;
+  q?: string;
+}) {
+  const params = new URLSearchParams();
+
+  if (page && page > 1) {
+    params.set("page", String(page));
+  }
+
+  if (tag) {
+    params.set("tag", tag);
+  }
+
+  if (q) {
+    params.set("q", q);
+  }
+
+  const queryString = params.toString();
+
+  return queryString ? `/blog?${queryString}` : "/blog";
+}
+
 export default async function BlogListPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string; tag?: string }>; // 👈 Terima params tag
+  searchParams: Promise<{ page?: string; tag?: string; q?: string }>;
 }) {
   const params = await searchParams;
   const currentPage = Number(params.page) || 1;
-  const currentTag = params.tag; // 👈 Ambil tag
+  const currentTag = params.tag?.trim();
+  const currentQuery = params.q?.trim() ?? "";
   const limit = 6; 
 
   const session = await auth(); 
 
-  // Kirim tag ke server action
-  const { data: posts, metadata } = await getPublishedPosts(currentPage, limit, currentTag);
+  const {
+    data: posts,
+    metadata: pagination,
+  } = await getPublishedPosts(currentPage, limit, currentTag, currentQuery || undefined);
+
+  const activeFilters = [
+    currentTag ? `tag "${currentTag}"` : null,
+    currentQuery ? `keyword "${currentQuery}"` : null,
+  ].filter(Boolean);
+
+  const isFiltered = activeFilters.length > 0;
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-6xl">
@@ -34,27 +73,62 @@ export default async function BlogListPage({
         <p className="text-muted-foreground max-w-2xl text-lg">
           Insights, tutorials, and updates from our team.
         </p>
+
+        <div className="w-full max-w-2xl pt-2">
+          <ContentSearchForm
+            actionPath="/blog"
+            query={currentQuery}
+            placeholder="Search by title, excerpt, content, or tags..."
+            hiddenParams={{ tag: currentTag }}
+            clearHref={buildBlogHref({ tag: currentTag })}
+          />
+        </div>
         
-        {/* 👇 Indikator Filter Aktif */}
-        {currentTag && (
-            <div className="flex items-center gap-2 mt-4 animate-in fade-in zoom-in duration-300">
+        {isFiltered && (
+            <div className="flex flex-wrap items-center justify-center gap-2 mt-4 animate-in fade-in zoom-in duration-300">
                 <span className="text-sm text-muted-foreground">Filtered by:</span>
-                <Badge variant="secondary" className="pl-3 pr-1 py-1 text-sm gap-2 hover:bg-secondary flex items-center">
-                    #{currentTag}
-                    <Link href="/blog" className="hover:text-destructive transition-colors p-1 rounded-full hover:bg-muted ml-1">
-                        <X className="w-3 h-3" />
-                    </Link>
-                </Badge>
+
+                {currentTag && (
+                  <Badge variant="secondary" className="pl-3 pr-1 py-1 text-sm gap-2 hover:bg-secondary flex items-center">
+                      #{currentTag}
+                      <Link
+                        href={buildBlogHref({ q: currentQuery || undefined })}
+                        className="hover:text-destructive transition-colors p-1 rounded-full hover:bg-muted ml-1"
+                      >
+                          <X className="w-3 h-3" />
+                      </Link>
+                  </Badge>
+                )}
+
+                {currentQuery && (
+                  <Badge variant="outline" className="pl-3 pr-1 py-1 text-sm gap-2 hover:bg-muted flex items-center">
+                      <span>{`"${currentQuery}"`}</span>
+                      <Link
+                        href={buildBlogHref({ tag: currentTag })}
+                        className="hover:text-destructive transition-colors p-1 rounded-full hover:bg-muted ml-1"
+                      >
+                          <X className="w-3 h-3" />
+                      </Link>
+                  </Badge>
+                )}
             </div>
         )}
       </div>
 
+      {posts.length > 0 && (
+        <div className="mb-6 text-sm text-muted-foreground">
+          Showing {posts.length} of {pagination.totalItems} post{pagination.totalItems === 1 ? "" : "s"}
+          {currentQuery ? ` for "${currentQuery}"` : ""}
+          {currentTag ? ` in #${currentTag}` : ""}.
+        </div>
+      )}
+
       {posts.length === 0 ? (
         <div className="text-center py-20 bg-muted/30 rounded-xl border border-dashed">
           <p className="text-muted-foreground text-lg">
-            {currentTag ? `No posts found with tag "${currentTag}"` : "No posts published yet."}
+            {isFiltered ? `No posts found for ${activeFilters.join(" and ")}.` : "No posts published yet."}
           </p>
-          {currentTag && (
+          {isFiltered && (
              <Link href="/blog">
                 <Button variant="link" className="mt-2 text-primary">Clear filter</Button>
              </Link>
@@ -92,7 +166,7 @@ export default async function BlogListPage({
                   {/* 👇 TAGS JADI LINK */}
                   {firstTag && (
                      <div className="-mt-9 mb-3 flex justify-between items-end">
-                       <Link href={`/blog?tag=${firstTag}`}>
+                       <Link href={buildBlogHref({ tag: firstTag, q: currentQuery || undefined })}>
                          <Badge className="shadow-sm cursor-pointer hover:bg-primary/90 transition-colors">
                            {firstTag}
                          </Badge>
@@ -143,27 +217,35 @@ export default async function BlogListPage({
         </div>
       )}
 
-      {/* PAGINATION (PRESERVE TAG) */}
-      {posts.length > 0 && (metadata.hasPrevPage || metadata.hasNextPage) && (
+        {/* PAGINATION (PRESERVE TAG + QUERY) */}
+        {posts.length > 0 && (pagination.hasPrevPage || pagination.hasNextPage) && (
         <div className="flex justify-center gap-2 mt-12">
             <Link 
-                href={`/blog?page=${metadata.currentPage - 1}${currentTag ? `&tag=${currentTag}` : ''}`} 
-                className={!metadata.hasPrevPage ? "pointer-events-none" : ""}
+            href={buildBlogHref({
+              page: pagination.currentPage - 1,
+              tag: currentTag,
+              q: currentQuery || undefined,
+            })}
+            className={!pagination.hasPrevPage ? "pointer-events-none" : ""}
             >
-                <Button variant="outline" disabled={!metadata.hasPrevPage}>
+            <Button variant="outline" disabled={!pagination.hasPrevPage}>
                     <ChevronLeft className="w-4 h-4 mr-2" /> Previous
                 </Button>
             </Link>
             
             <div className="flex items-center px-4 font-medium text-sm">
-                Page {metadata.currentPage} of {metadata.totalPages}
+            Page {pagination.currentPage} of {pagination.totalPages}
             </div>
 
             <Link 
-                href={`/blog?page=${metadata.currentPage + 1}${currentTag ? `&tag=${currentTag}` : ''}`} 
-                className={!metadata.hasNextPage ? "pointer-events-none" : ""}
+            href={buildBlogHref({
+              page: pagination.currentPage + 1,
+              tag: currentTag,
+              q: currentQuery || undefined,
+            })}
+            className={!pagination.hasNextPage ? "pointer-events-none" : ""}
             >
-                <Button variant="outline" disabled={!metadata.hasNextPage}>
+            <Button variant="outline" disabled={!pagination.hasNextPage}>
                     Next <ChevronRight className="w-4 h-4 ml-2" />
                 </Button>
             </Link>

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ExternalLink, FolderOpen, Github } from "lucide-react";
 
 import { getPublicProjects } from "@/actions/projects";
+import { ContentSearchForm } from "@/components/search/content-search-form";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
@@ -90,8 +91,14 @@ function ProjectCard({ project, featured = false }: { project: PublicProject; fe
   );
 }
 
-export default async function ProjectsPage() {
-  const projects = await getPublicProjects();
+export default async function ProjectsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
+  const params = await searchParams;
+  const currentQuery = params.q?.trim() ?? "";
+  const projects = await getPublicProjects(currentQuery || undefined);
 
   const featuredProjects = projects.filter((project) => Boolean(project.isFeatured));
   const regularProjects = projects.filter((project) => !project.isFeatured);
@@ -103,16 +110,40 @@ export default async function ProjectsPage() {
         <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
           Collection of builds, experiments, and production work from the A-1412 journey.
         </p>
+
+        <div className="mx-auto w-full max-w-2xl pt-2">
+          <ContentSearchForm
+            actionPath="/projects"
+            query={currentQuery}
+            placeholder="Search by project name, description, or stack..."
+            clearHref="/projects"
+          />
+        </div>
+
+        <p className="text-sm text-muted-foreground">
+          Found {projects.length} project{projects.length === 1 ? "" : "s"}
+          {currentQuery ? ` for "${currentQuery}"` : ""}.
+        </p>
       </header>
 
       {projects.length === 0 ? (
         <section className="rounded-xl border border-dashed bg-muted/20 py-16 text-center">
           <div className="mx-auto flex max-w-sm flex-col items-center gap-3">
             <FolderOpen className="h-8 w-8 text-muted-foreground" />
-            <h2 className="text-xl font-semibold">No projects yet</h2>
+            <h2 className="text-xl font-semibold">
+              {currentQuery ? "No matching projects" : "No projects yet"}
+            </h2>
             <p className="text-sm text-muted-foreground">
-              Projects will appear here as soon as they are published from dashboard.
+              {currentQuery
+                ? "Try another keyword or clear search to view all projects."
+                : "Projects will appear here as soon as they are published from dashboard."}
             </p>
+
+            {currentQuery && (
+              <Button asChild variant="outline" size="sm" className="mt-1">
+                <Link href="/projects">Clear search</Link>
+              </Button>
+            )}
           </div>
         </section>
       ) : (
