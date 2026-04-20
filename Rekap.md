@@ -104,24 +104,28 @@ Bukti utama:
   - src/app/(public)/blog/[slug]/page.tsx
 
 ### 8B. Profile and About Engine
-Status: Belum mulai
+Status: Selesai (terverifikasi)
 
 Temuan:
-- Belum ada src/actions/profile.ts
-- Belum ada route dashboard profile
-- Belum ada tabel profile/experience pada src/db/schema.ts
-- Belum ada page public /about
+- Tabel profile dan experience sudah tersedia di src/db/schema.ts
+- Registrasi schema profile/experience sudah ditambahkan ke src/lib/db.ts
+- Server actions profile sudah tersedia di src/actions/profile.ts (update profile + CRUD experience)
+- Dashboard profile sudah tersedia di src/app/dashboard/profile/page.tsx
+- Halaman public about sudah tersedia di src/app/(public)/about/page.tsx
+- Home about section sudah membaca data profile dinamis di src/components/home/about-section.tsx
 
 ### 8C. Projects Dynamic Integration
-Status: Sebagian
+Status: Selesai (terverifikasi)
 
 Temuan:
 - CRUD project admin sudah ada:
   - src/actions/projects.ts
   - src/app/dashboard/projects/page.tsx
-- Integrasi public projects belum ada:
-  - Route public src/app/projects/page.tsx belum ditemukan
-  - Navbar sudah mengarah ke /projects (src/components/layout/navbar.tsx), tetapi route public belum tersedia
+- Integrasi public projects sudah aktif:
+  - Route public tersedia di src/app/(public)/projects/page.tsx
+  - Data diambil dari server action getPublicProjects() pada src/actions/projects.ts
+  - Query menggunakan db.query.projects.findMany() dengan urutan terbaru
+  - revalidatePath("/projects") sudah dipasang pada create/delete project
 
 ### 8D. Optional Enhancements (Global Search)
 Status: Belum mulai
@@ -150,16 +154,21 @@ Sudah ada dan berjalan:
 - Guestbook sosial (likes, replies, notifications)
 - Message + reply + email templates
 - Blog engine end-to-end (admin CMS dan public pages)
+- Public projects page sudah live dan terhubung ke database
+- Profile/About engine sudah live (schema, actions, dashboard, public page)
 
 Belum selesai atau belum ada:
-- Engine profile/about berbasis database
-- Public projects page berbasis data DB
 - Global search
 - Polish SEO dan fase future expansion
 
 ## 5. Prioritas Lanjutan (Disarankan)
 
 Tujuan bagian ini: memberi urutan eksekusi paling aman, paling konsisten, dan paling minim risiko regression berdasarkan arsitektur yang sudah berjalan saat ini.
+
+Update terakhir implementasi:
+1. Prioritas 1 (P0) selesai pada 20 April 2026.
+2. Prioritas 2 (P1) selesai pada 20 April 2026.
+3. Fokus aktif berikutnya: Prioritas 3 (P2) - Polish and SEO Baseline.
 
 Prinsip konsistensi (harga mati):
 1. Semua perubahan schema tetap terpusat di src/db/schema.ts.
@@ -170,6 +179,15 @@ Prinsip konsistensi (harga mati):
 6. Style tetap mengikuti komponen UI yang sudah dipakai (button, card, table, badge, input, textarea) tanpa bikin design system baru.
 
 ### Prioritas 1 (P0) - Tutup Gap Public Projects (Phase 8C)
+
+Status: Selesai (20 April 2026)
+
+Ringkasan hasil implementasi:
+1. Menambahkan fungsi read-only getPublicProjects() di src/actions/projects.ts.
+2. Menambahkan route public src/app/(public)/projects/page.tsx.
+3. Menampilkan Featured Projects dan All/More Projects dari data DB.
+4. Menambahkan fallback aman untuk image/link kosong.
+5. Menambahkan revalidatePath("/projects") setelah create/delete project.
 
 Alasan prioritas:
 1. Link Projects di navbar sudah aktif, tetapi halaman public untuk user belum tersedia.
@@ -196,6 +214,15 @@ Definition of Done:
 4. Dashboard projects existing tetap berfungsi tanpa perubahan perilaku.
 
 ### Prioritas 2 (P1) - Bangun Profile and About Engine End-to-End (Phase 8B)
+
+Status: Selesai (20 April 2026)
+
+Ringkasan hasil implementasi:
+1. Menambahkan tabel profile dan experience di src/db/schema.ts.
+2. Menambahkan server actions src/actions/profile.ts untuk update profile dan CRUD experience.
+3. Menambahkan dashboard profile manager di src/app/dashboard/profile/page.tsx.
+4. Menambahkan halaman public about di src/app/(public)/about/page.tsx.
+5. Merefactor home about section agar membaca profile data dinamis.
 
 Alasan prioritas:
 1. Ini pondasi konten personal agar update bio/experience tidak hardcoded.
@@ -248,9 +275,9 @@ Definition of Done:
 
 ### Urutan Eksekusi yang Disarankan
 
-1. Kerjakan Prioritas 1 (P0) sampai selesai total.
-2. Lanjut Prioritas 2 (P1) sampai data profile/about benar-benar hidup dari DB.
-3. Tutup dengan Prioritas 3 (P2) untuk quality pass sebelum masuk fase ekspansi.
+1. Prioritas 1 (P0) sudah selesai dan terverifikasi.
+2. Prioritas 2 (P1) sudah selesai dan terverifikasi.
+3. Fokus aktif berikutnya: Prioritas 3 (P2) untuk quality pass sebelum masuk fase ekspansi.
 
 Urutan ini dipilih agar perbaikan berjalan bertahap, konsisten dengan struktur codebase yang sudah ada, dan minim risiko bongkar ulang.
 
