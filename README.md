@@ -83,19 +83,24 @@ Fokus: Membangun sistem artikel dari nol (Database -> Admin -> Public).
 
 #### B. The Profile & About Engine (Second Priority)
 Fokus: Membuat halaman About/CV dinamis agar mudah update experience/bio.
-- [ ] **DB Schema:** Membuat tabel `profile` (Bio, Avatar) dan `experience` (Work History).
-- [ ] **Server Actions:** Membuat `src/actions/profile.ts` untuk update Bio dan CRUD Experience.
-- [ ] **Admin CMS:** Membuat halaman Dashboard `/dashboard/profile` untuk form edit profile & timeline.
-- [ ] **Public Page:** Refactor halaman `/about` agar merender data timeline dari Database.
+- [x] **DB Schema:** Tabel `profile` (Bio, Avatar, Headline, dll) dan `experience` (Work History) sudah ditambahkan.
+- [x] **Server Actions:** `src/actions/profile.ts` sudah tersedia untuk update profile dan CRUD Experience.
+- [x] **Admin CMS:** Halaman Dashboard `/dashboard/profile` sudah tersedia untuk form profile dan timeline manager.
+- [x] **Public Page:** Halaman `/about` sudah merender data profile + timeline dari database.
 
 #### C. Projects Dynamic Integration (Third Priority)
 Fokus: Menghapus dummy data di halaman Projects dan menghubungkannya ke DB yang sudah ada.
-- [ ] **Refactor Frontend:** Menghapus array statis di `src/app/projects/page.tsx`.
-- [ ] **Data Fetching:** Mengganti logika render dengan `db.query.projects.findMany()`.
-- [ ] **Final Check:** Memastikan gambar dan link project tampil benar dari database.
+- [x] **Refactor Frontend:** Implementasi halaman publik Projects di `src/app/(public)/projects/page.tsx` (menggantikan rencana lama `src/app/projects/page.tsx`) tanpa data statis.
+- [x] **Data Fetching:** Render data memakai server action `getPublicProjects()` dengan `db.query.projects.findMany()`.
+- [x] **Final Check:** Card project, fallback image, dan link demo/repo sudah tampil dari database.
 
-#### D. Optional Enhancements
-- [ ] **Global Search:** Pencarian sederhana untuk memfilter Blog dan Projects sekaligus.
+#### D. Global Search Engine (Fourth Priority)
+Fokus: Menjadikan pencarian lintas konten sebagai fitur resmi sebelum masuk ke tahap Polish & SEO.
+- [x] **Search Contract:** Query parameter `q` sudah distandarkan pada halaman `/blog` dan `/projects`.
+- [x] **Server Actions:** Keyword search di `src/actions/blog.ts` dan `src/actions/projects.ts` sudah aktif berbasis `ilike`.
+- [x] **Public UI:** Search Bar reusable sudah terintegrasi pada halaman publik Blog dan Projects.
+- [x] **Search UX:** Result count, empty-state, clear filter, dan persist query pada pagination sudah berjalan.
+- [x] **Final Check:** Hasil pencarian lintas konten sudah konsisten, URL shareable, dan type-check aman.
 
 ### ✨ Phase 9: Polish & SEO
 Branch: feat/polish-seo Goal: Finishing touches, SEO, dan performa sebelum rilis.

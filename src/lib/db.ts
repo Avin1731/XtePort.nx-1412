@@ -21,6 +21,8 @@ export const db = drizzle(sql, {
     guestbookReplyLikes: schema.guestbookReplyLikes,
     notifications: schema.notifications,
     projects: schema.projects,
+    profile: schema.profile,
+    experience: schema.experience,
     techStack: schema.techStack,
     visitors: schema.visitors,
     messages: schema.messages,
@@ -36,6 +38,8 @@ export const db = drizzle(sql, {
     guestbookLikesRelations: schema.guestbookLikesRelations,
     guestbookReplyLikesRelations: schema.guestbookReplyLikesRelations,
     notificationsRelations: schema.notificationsRelations,
+    profileRelations: schema.profileRelations,
+    experienceRelations: schema.experienceRelations,
 
     // === 👇 NEW BLOG RELATIONS (Tambahkan ini) ===
     postsRelations: schema.postsRelations,

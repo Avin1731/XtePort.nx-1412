@@ -3,18 +3,18 @@
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import { posts, postLikes } from "@/db/schema";
-import { desc, eq, and, count, ilike } from "drizzle-orm"; // 👈 Tambah ilike
+import { and, count, desc, eq, ilike, or } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 
 // Helper: Simple Slug Generator
 function generateSlug(title: string) {
-  return title
-    .toLowerCase()
-    .trim()
-    .replace(/[^\w\s-]/g, "")
-    .replace(/[\s_-]+/g, "-")
-    .replace(/^-+|-+$/g, "");
+    return title
+        .toLowerCase()
+        .trim()
+        .replace(/[^\w\s-]/g, "")
+        .replace(/[\s_-]+/g, "-")
+        .replace(/^-+|-+$/g, "");
 }
 
 // Helper: Normalize Images
@@ -37,44 +37,6 @@ function normalizeImages(images: unknown): string[] {
 // ==========================================
 
 export async function createPost(formData: {
-  title: string;
-  excerpt: string;
-  content: string;
-  images: string[];
-  tags?: string;
-  isPublished?: boolean;
-}) {
-  const session = await auth();
-  
-  if (session?.user?.role !== "admin") {
-    throw new Error("Unauthorized: Admin access required.");
-  }
-
-  const slug = generateSlug(formData.title);
-  
-  const existing = await db.query.posts.findFirst({
-    where: eq(posts.slug, slug),
-  });
-
-  if (existing) {
-    throw new Error("Slug already exists. Please change the title.");
-  }
-
-  await db.insert(posts).values({
-    title: formData.title,
-    slug: slug,
-    excerpt: formData.excerpt,
-    content: formData.content,
-    images: formData.images,
-    tags: formData.tags,
-    isPublished: formData.isPublished || false,
-  });
-
-  revalidatePath("/blog");
-  revalidatePath("/dashboard/blog");
-}
-
-export async function updatePost(id: string, formData: {
     title: string;
     excerpt: string;
     content: string;
@@ -83,17 +45,61 @@ export async function updatePost(id: string, formData: {
     isPublished?: boolean;
 }) {
     const session = await auth();
-    if (session?.user?.role !== "admin") throw new Error("Unauthorized");
 
-    await db.update(posts).set({
+    if (session?.user?.role !== "admin") {
+        throw new Error("Unauthorized: Admin access required.");
+    }
+
+    const slug = generateSlug(formData.title);
+
+    const existing = await db.query.posts.findFirst({
+        where: eq(posts.slug, slug),
+    });
+
+    if (existing) {
+        throw new Error("Slug already exists. Please change the title.");
+    }
+
+    await db.insert(posts).values({
         title: formData.title,
+        slug,
         excerpt: formData.excerpt,
         content: formData.content,
         images: formData.images,
         tags: formData.tags,
-        isPublished: formData.isPublished,
-        updatedAt: new Date(),
-    }).where(eq(posts.id, id));
+        isPublished: formData.isPublished || false,
+    });
+
+    revalidatePath("/blog");
+    revalidatePath("/dashboard/blog");
+}
+
+export async function updatePost(
+    id: string,
+    formData: {
+        title: string;
+        excerpt: string;
+        content: string;
+        images: string[];
+        tags?: string;
+        isPublished?: boolean;
+    }
+) {
+    const session = await auth();
+    if (session?.user?.role !== "admin") throw new Error("Unauthorized");
+
+    await db
+        .update(posts)
+        .set({
+            title: formData.title,
+            excerpt: formData.excerpt,
+            content: formData.content,
+            images: formData.images,
+            tags: formData.tags,
+            isPublished: formData.isPublished,
+            updatedAt: new Date(),
+        })
+        .where(eq(posts.id, id));
 
     revalidatePath("/blog");
     revalidatePath("/dashboard/blog");
@@ -112,42 +118,58 @@ export async function getAllPosts() {
     const session = await auth();
     if (session?.user?.role !== "admin") throw new Error("Unauthorized");
 
-    return await db.select().from(posts).orderBy(desc(posts.createdAt));
+    return db.select().from(posts).orderBy(desc(posts.createdAt));
 }
 
 // ==========================================
-// 🌍 PUBLIC ACTIONS (UPDATED: TAG FILTER)
+// 🌍 PUBLIC ACTIONS (TAG + KEYWORD SEARCH)
 // ==========================================
 
-export async function getPublishedPosts(page: number = 1, limit: number = 6, tag?: string) {
+export async function getPublishedPosts(
+    page: number = 1,
+    limit: number = 6,
+    tag?: string,
+    query?: string
+) {
     const offset = (page - 1) * limit;
+    const normalizedTag = tag?.trim();
+    const normalizedQuery = query?.trim();
 
-    // 👇 Logic Filter: Jika ada tag, cari yang mengandung text tag tersebut (ilike)
-    const whereCondition = tag 
-        ? and(eq(posts.isPublished, true), ilike(posts.tags, `%${tag}%`))
-        : eq(posts.isPublished, true);
+    let whereCondition = eq(posts.isPublished, true);
+
+    if (normalizedTag) {
+        whereCondition = and(whereCondition, ilike(posts.tags, `%${normalizedTag}%`))!;
+    }
+
+    if (normalizedQuery) {
+        const queryCondition = or(
+            ilike(posts.title, `%${normalizedQuery}%`),
+            ilike(posts.excerpt, `%${normalizedQuery}%`),
+            ilike(posts.content, `%${normalizedQuery}%`),
+            ilike(posts.tags, `%${normalizedQuery}%`)
+        );
+
+        if (queryCondition) {
+            whereCondition = and(whereCondition, queryCondition)!;
+        }
+    }
 
     const rawData = await db.query.posts.findMany({
-        where: whereCondition, 
+        where: whereCondition,
         orderBy: desc(posts.createdAt),
-        limit: limit,
-        offset: offset,
+        limit,
+        offset,
         with: {
-            likes: true
-        }
+            likes: true,
+        },
     });
-    
-    // Normalize data di server
-    const data = rawData.map(post => ({
+
+    const data = rawData.map((post) => ({
         ...post,
-        images: normalizeImages(post.images)
+        images: normalizeImages(post.images),
     }));
-    
-    // Hitung Total (harus difilter juga agar pagination akurat)
-    const totalPosts = await db.select({ count: count() })
-        .from(posts)
-        .where(whereCondition);
-        
+
+    const totalPosts = await db.select({ count: count() }).from(posts).where(whereCondition);
     const total = totalPosts[0].count;
     const totalPages = Math.ceil(total / limit);
 
@@ -155,10 +177,11 @@ export async function getPublishedPosts(page: number = 1, limit: number = 6, tag
         data,
         metadata: {
             currentPage: page,
-            totalPages: totalPages,
+            totalPages,
             hasNextPage: page < totalPages,
-            hasPrevPage: page > 1
-        }
+            hasPrevPage: page > 1,
+            totalItems: total,
+        },
     };
 }
 
@@ -166,16 +189,15 @@ export async function getPostBySlug(slug: string) {
     const post = await db.query.posts.findFirst({
         where: eq(posts.slug, slug),
         with: {
-            likes: true
-        }
+            likes: true,
+        },
     });
 
     if (!post) return null;
 
-    // Return data bersih
     return {
         ...post,
-        images: normalizeImages(post.images)
+        images: normalizeImages(post.images),
     };
 }
 
@@ -187,29 +209,28 @@ export async function incrementPostView(slug: string) {
     const cookieStore = await cookies();
     const cookieName = `viewed_${slug}`;
 
-    // Cek apakah user sudah baca artikel ini dalam 24 jam terakhir
     if (cookieStore.has(cookieName)) {
-        return; 
+        return;
     }
 
     const post = await db.query.posts.findFirst({
         where: eq(posts.slug, slug),
-        columns: { id: true, viewCount: true }
+        columns: { id: true, viewCount: true },
     });
 
     if (!post) return;
 
-    await db.update(posts)
+    await db
+        .update(posts)
         .set({ viewCount: (post.viewCount || 0) + 1 })
         .where(eq(posts.id, post.id));
 
-    // Set cookie expired 1 hari
     cookieStore.set(cookieName, "true", {
-        maxAge: 60 * 60 * 24, 
+        maxAge: 60 * 60 * 24,
         path: "/",
         httpOnly: true,
     });
-    
+
     revalidatePath(`/blog/${slug}`);
 }
 
@@ -222,31 +243,31 @@ export async function toggleBlogLike(postId: string) {
     if (!session?.user?.id) throw new Error("Unauthorized");
 
     const existingLike = await db.query.postLikes.findFirst({
-        where: and(
-            eq(postLikes.postId, postId),
-            eq(postLikes.userId, session.user.id)
-        )
+        where: and(eq(postLikes.postId, postId), eq(postLikes.userId, session.user.id)),
     });
 
     if (existingLike) {
-        await db.delete(postLikes).where(
-            and(eq(postLikes.postId, postId), eq(postLikes.userId, session.user.id))
-        );
+        await db
+            .delete(postLikes)
+            .where(and(eq(postLikes.postId, postId), eq(postLikes.userId, session.user.id)));
     } else {
         await db.insert(postLikes).values({
-            postId: postId,
-            userId: session.user.id
+            postId,
+            userId: session.user.id,
         });
     }
 
     revalidatePath("/blog");
-    return { liked: !existingLike }; 
+    return { liked: !existingLike };
 }
 
 export async function getLikeStatus(postId: string) {
     const session = await auth();
-    
-    const totalLikes = await db.select({ count: count() }).from(postLikes).where(eq(postLikes.postId, postId));
+
+    const totalLikes = await db
+        .select({ count: count() })
+        .from(postLikes)
+        .where(eq(postLikes.postId, postId));
     const likesCount = totalLikes[0].count;
 
     if (!session?.user?.id) {
@@ -254,10 +275,7 @@ export async function getLikeStatus(postId: string) {
     }
 
     const like = await db.query.postLikes.findFirst({
-        where: and(
-            eq(postLikes.postId, postId),
-            eq(postLikes.userId, session.user.id)
-        )
+        where: and(eq(postLikes.postId, postId), eq(postLikes.userId, session.user.id)),
     });
 
     return { hasLiked: !!like, likesCount };
