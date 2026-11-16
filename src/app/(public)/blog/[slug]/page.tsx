@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { PostCarousel } from "@/components/dashboard/PostCarousel"; 
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { auth } from "@/auth";
 import { ViewCounter } from "@/components/dashboard/view-counter";
 import { LikeButton } from "@/components/dashboard/like-button";
@@ -104,7 +105,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
       {/* CONTENT BODY */}
       <div className="prose prose-lg dark:prose-invert max-w-none">
-        <ReactMarkdown>{post.content}</ReactMarkdown>
+        <ReactMarkdown remarkPlugins={[remarkGfm]}>{post.content}</ReactMarkdown>
       </div>
 
     </article>
