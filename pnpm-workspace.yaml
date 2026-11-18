@@ -1,9 +1,11 @@
 packages:
   - .
 
-ignoredBuiltDependencies:
-  - sharp
-  - unrs-resolver
+allowBuilds:
+  esbuild: true
+  sharp: false
+  unrs-resolver: false
 
-onlyBuiltDependencies:
-  - esbuild
+minimumReleaseAgeExclude:
+  - lucide-react@1.75.0
+  - react-email@6.11.16
