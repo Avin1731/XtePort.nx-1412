@@ -264,6 +264,8 @@ export function ChatWidget() {
 
       {/* FAB ICON */}
       <motion.button
+        type="button"
+        aria-label="Toggle AI assistant chat"
         onClick={() => setIsOpen(!isOpen)}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
