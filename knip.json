@@ -1,0 +1,27 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": [
+    "scripts/seed-test.ts"
+  ],
+  "project": [
+    "src/**/*.{ts,tsx,css}",
+    "scripts/**/*.ts",
+    "tests/**/*.ts"
+  ],
+  "ignore": [
+    "src/components/ui/**",
+    "src/components/guestbook/reply-button.tsx",
+    "test-connection.ts"
+  ],
+  "ignoreDependencies": [
+    "@radix-ui/react-separator",
+    "prettier",
+    "prettier-plugin-tailwindcss"
+  ],
+  "rules": {
+    "exports": "warn",
+    "duplicates": "warn",
+    "types": "warn"
+  },
+  "ignoreExportsUsedInFile": true
+}
