@@ -1,5 +1,6 @@
-import { ArrowRight, Github, Linkedin } from "lucide-react"
+import { ArrowRight } from "lucide-react"
 import Link from "next/link"
+import { GithubIcon, LinkedinIcon } from "@/components/icons/brand-icons"
 import { Button } from "@/components/ui/button"
 import { FadeIn } from "@/components/animation/fade-in"
 
@@ -49,11 +50,11 @@ export function HeroSection() {
         {/* Social Links */}
         <FadeIn delay={0.8} className="mt-8 flex gap-4 text-muted-foreground">
           <Link href="https://github.com/Avin1731" target="_blank" className="hover:text-primary transition-colors">
-            <Github className="h-6 w-6" />
+            <GithubIcon className="h-6 w-6" />
             <span className="sr-only">GitHub</span>
           </Link>
           <Link href="#" target="_blank" className="hover:text-primary transition-colors">
-            <Linkedin className="h-6 w-6" />
+            <LinkedinIcon className="h-6 w-6" />
             <span className="sr-only">LinkedIn</span>
           </Link>
         </FadeIn>

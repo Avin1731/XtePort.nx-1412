@@ -20,7 +20,7 @@ interface PostCarouselProps {
 
 export function PostCarousel({ images, slug, aspectRatio = "video", className }: PostCarouselProps) {
   // Autoplay 4 detik
-  const plugin = React.useRef(
+  const [plugin] = React.useState(() =>
     Autoplay({ delay: 4000, stopOnInteraction: true })
   );
 
@@ -28,10 +28,10 @@ export function PostCarousel({ images, slug, aspectRatio = "video", className }:
 
   return (
     <Carousel
-      plugins={[plugin.current]}
+      plugins={[plugin]}
       className={`w-full max-w-full group ${className}`}
-      onMouseEnter={plugin.current.stop}
-      onMouseLeave={plugin.current.reset}
+      onMouseEnter={() => plugin.stop()}
+      onMouseLeave={() => plugin.reset()}
       opts={{ loop: true }}
     >
       <CarouselContent>

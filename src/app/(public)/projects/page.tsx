@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { ExternalLink, FolderOpen, Github } from "lucide-react";
+import { ExternalLink, FolderOpen } from "lucide-react";
 
 import { getPublicProjects } from "@/actions/projects";
+import { GithubIcon } from "@/components/icons/brand-icons";
 import { ContentSearchForm } from "@/components/search/content-search-form";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -77,7 +78,7 @@ function ProjectCard({ project, featured = false }: { project: PublicProject; fe
             <Button asChild variant="outline" size="sm">
               <Link href={project.repoUrl} target="_blank" rel="noreferrer noopener">
                 Source
-                <Github className="h-3.5 w-3.5" />
+                <GithubIcon className="h-3.5 w-3.5" />
               </Link>
             </Button>
           )}
