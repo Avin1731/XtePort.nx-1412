@@ -55,3 +55,78 @@ jobs:
 
       - name: Production security audit
         run: pnpm audit --prod --audit-level=critical
+
+  e2e:
+    name: Playwright E2E Suite
+    runs-on: ubuntu-latest
+    needs: quality-gate
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: a1412_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/a1412_test
+      USE_LOCAL_PG: "1"
+      PLAYWRIGHT_TEST: "1"
+      E2E_AUTH_SECRET: ci_e2e_auth_secret_only
+      AUTH_SECRET: ci_e2e_nextauth_secret_32_characters_min
+      AUTH_URL: http://127.0.0.1:3000
+      AUTH_TRUST_HOST: "true"
+      AUTH_GOOGLE_ID: ci_google_id
+      AUTH_GOOGLE_SECRET: ci_google_secret
+      ADMIN_EMAIL: admin@example.com
+      RESEND_API_KEY: re_ci_placeholder_key
+      NEXT_PUBLIC_APP_URL: http://127.0.0.1:3000
+      NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: ci_cloud
+      NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET: ci_preset
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright Chromium
+        run: pnpm exec playwright install chromium --with-deps
+
+      - name: Push Drizzle schema to test Postgres
+        run: pnpm exec drizzle-kit push --force
+
+      - name: Seed E2E test data
+        run: pnpm exec tsx scripts/seed-test.ts
+
+      - name: Build application for E2E
+        run: pnpm build
+
+      - name: Run Playwright E2E tests
+        run: pnpm test:e2e
+
+      - name: Upload Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
