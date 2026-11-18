@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/Avin1731/XtePort.nx-1412/compare/a-1412-v0.2.0...a-1412-v0.2.1) (2026-11-18)
+
+
+### Bug Fixes
+
+* **auth:** split edge-safe auth config and fix theme toggle ([fbd955d](https://github.com/Avin1731/XtePort.nx-1412/commit/fbd955d048a2ce52708d84769e9c854fa2120cd1))
+
 ## [0.2.0](https://github.com/Avin1731/XtePort.nx-1412/compare/a-1412-v0.1.0...a-1412-v0.2.0) (2026-11-16)
 
 
