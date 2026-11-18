@@ -1,0 +1,43 @@
+name: Weekly Health & Link Check
+
+on:
+  schedule:
+    - cron: "0 1 * * 1" # Every Monday 08:00 WIB (01:00 UTC)
+  workflow_dispatch:
+
+jobs:
+  broken-links:
+    name: Dead Link Checker (Docs & Repo)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check Markdown links with Lychee
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: >-
+            --verbose
+            --no-progress
+            --exclude "localhost"
+            --exclude "127\.0\.0\.1"
+            --exclude "example\.com"
+            --exclude "file:///"
+            README.md Rekap.md
+          fail: false
+
+  production-uptime:
+    name: Production Endpoint Health Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check live Vercel routes return 200 OK
+        run: |
+          BASE_URL="https://xte-port-nx-1412.vercel.app"
+          for path in "/" "/about" "/projects" "/blog" "/guestbook"; do
+            status=$(curl -s -o /dev/null -w "%{http_code}" -L "$BASE_URL$path")
+            echo "$BASE_URL$path -> HTTP $status"
+            if [ "$status" != "200" ]; then
+              echo "Health check failed for $BASE_URL$path (HTTP $status)"
+              exit 1
+            fi
+          done

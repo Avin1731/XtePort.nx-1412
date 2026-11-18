@@ -40,6 +40,14 @@ jobs:
       - name: ESLint check
         run: pnpm lint
 
+      - name: Dead code & unused dependencies check
+        run: pnpm check:unused
+
+      - name: Drizzle schema integrity check
+        env:
+          DATABASE_URL: postgresql://ci_user:ci_pass@ep-ci-placeholder.us-east-2.aws.neon.tech/neondb?sslmode=require
+        run: pnpm exec drizzle-kit check
+
       - name: Production build check
         env:
           DATABASE_URL: postgresql://ci_user:ci_pass@ep-ci-placeholder.us-east-2.aws.neon.tech/neondb?sslmode=require
