@@ -1,0 +1,128 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":preserveSemverRanges"
+  ],
+  "baseBranchPatterns": [
+    "dev"
+  ],
+  "timezone": "Asia/Jakarta",
+  "schedule": [
+    "before 7am on monday"
+  ],
+  "labels": [
+    "dependencies"
+  ],
+  "prConcurrentLimit": 5,
+  "prHourlyLimit": 2,
+  "platformAutomerge": true,
+  "automergeType": "pr",
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "labels": [
+      "security"
+    ],
+    "automerge": true
+  },
+  "packageRules": [
+    {
+      "description": "Group Next.js core and eslint-config-next together",
+      "groupName": "nextjs-stack",
+      "matchPackageNames": [
+        "next",
+        "eslint-config-next"
+      ]
+    },
+    {
+      "description": "Group React runtime and type definitions together",
+      "groupName": "react-core",
+      "matchPackageNames": [
+        "react",
+        "react-dom",
+        "@types/react",
+        "@types/react-dom"
+      ]
+    },
+    {
+      "description": "Group Drizzle ORM, Drizzle Kit, and Neon serverless driver together",
+      "groupName": "drizzle-stack",
+      "matchPackageNames": [
+        "drizzle-orm",
+        "drizzle-kit",
+        "@neondatabase/serverless"
+      ]
+    },
+    {
+      "description": "Group Tailwind CSS v4 packages together",
+      "groupName": "tailwind-stack",
+      "matchPackageNames": [
+        "tailwindcss",
+        "@tailwindcss/postcss",
+        "@tailwindcss/typography",
+        "prettier-plugin-tailwindcss"
+      ]
+    },
+    {
+      "description": "Group Auth.js packages together",
+      "groupName": "auth-stack",
+      "matchPackageNames": [
+        "next-auth",
+        "@auth/drizzle-adapter",
+        "@auth/core"
+      ]
+    },
+    {
+      "description": "Group Radix UI primitives together",
+      "groupName": "radix-ui",
+      "matchPackagePrefixes": [
+        "@radix-ui/"
+      ]
+    },
+    {
+      "description": "Group email stack together",
+      "groupName": "email-stack",
+      "matchPackageNames": [
+        "resend",
+        "react-email"
+      ]
+    },
+    {
+      "description": "Keep ESLint on v9 until eslint-config-next supports v10",
+      "matchPackageNames": [
+        "eslint"
+      ],
+      "allowedVersions": "<10.0.0"
+    },
+    {
+      "description": "Keep TypeScript <6.1.0 for typescript-eslint compatibility",
+      "matchPackageNames": [
+        "typescript"
+      ],
+      "allowedVersions": "<6.1.0"
+    },
+    {
+      "description": "Keep @types/node aligned with Node.js 22 LTS runtime",
+      "matchPackageNames": [
+        "@types/node"
+      ],
+      "allowedVersions": "^22.0.0"
+    },
+    {
+      "description": "Auto-merge patch and minor updates after CI checks pass",
+      "matchUpdateTypes": [
+        "patch",
+        "minor",
+        "digest"
+      ],
+      "automerge": true
+    },
+    {
+      "description": "Require manual review for major updates",
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "automerge": false
+    }
+  ]
+}
