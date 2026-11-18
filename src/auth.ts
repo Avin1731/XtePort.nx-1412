@@ -5,6 +5,7 @@ import { DrizzleAdapter } from "@auth/drizzle-adapter"
 import { db } from "@/lib/db"
 import { users } from "@/db/schema"
 import { eq } from "drizzle-orm"
+import { authConfig } from "@/auth.config"
 
 const isTestAuthEnabled =
   process.env.PLAYWRIGHT_TEST === "1" &&
@@ -53,10 +54,11 @@ const providers = [
 ]
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  ...authConfig,
   adapter: DrizzleAdapter(db),
   providers,
-  session: { strategy: "jwt" },
   callbacks: {
+    ...authConfig.callbacks,
     async jwt({ token }) {
       // Ambil role terbaru dari database setiap kali token dibuat
       if (!token.sub) return token
@@ -71,17 +73,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
       token.role = existingUser[0].role
       return token
-    },
-    session({ session, token }) {
-      if (session.user && token.sub) {
-        session.user.id = token.sub
-      }
-      // Masukkan role ke session user biar bisa dibaca di frontend/middleware
-      if (session.user && token.role) {
-        // @ts-expect-error // (Abaikan error typescript sebentar, nanti kita fix type-nya)
-        session.user.role = token.role
-      }
-      return session
     },
   },
 })
