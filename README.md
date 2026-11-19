@@ -104,11 +104,11 @@ Fokus: Menjadikan pencarian lintas konten sebagai fitur resmi sebelum masuk ke t
 
 ### ✨ Phase 9: Polish & SEO
 Branch: feat/polish-seo Goal: Finishing touches, SEO, dan performa sebelum rilis.
-[ ] SEO Meta: Setup Metadata API (Title, Desc, OpenGraph/Twitter Cards) dinamis per halaman.
-[ ] Loading States: Skeleton Loading untuk UX lebih halus saat fetch data (Projects/Blog/Guestbook).
-[ ] Error Handling: Custom 404 (Not Found) dan 500 (Error) pages yang estetik.
-[ ] Mobile Check: Final fix responsiveness di HP kentang.
-[ ] Final Release: Merge semua ke main dan production deploy.
+- [x] SEO Meta: Setup Metadata API (Title, Desc, OpenGraph/Twitter Cards, `sitemap.xml`, `robots.txt`) dinamis per halaman.
+- [x] Loading States: Skeleton Loading untuk UX lebih halus saat fetch data (About/Projects/Blog/Guestbook).
+- [x] Error Handling: Custom 404 (Not Found) dan Global Error (`500`) pages yang konsisten.
+- [x] Mobile Check: Final verification responsiveness lintas rute publik (`390x844` via Playwright).
+- [ ] Final Release: Merge semua ke main dan production deploy (`v1.0.0`).
 
 ### 🔮 Phase 10: Future Expansion
 Branch: feat/future-expansion Goal: Upgrade kecerdasan (AI), Integrasi API Pihak Ketiga, & Skalabilitas.
