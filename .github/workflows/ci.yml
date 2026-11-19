@@ -16,6 +16,7 @@ concurrency:
 jobs:
   quality-gate:
     name: Quality Gate (Type, Lint, Build, Audit)
+    if: github.event_name != 'pull_request' || github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
 
     steps:

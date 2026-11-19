@@ -13,6 +13,7 @@ import {
   Link,
 } from "react-email";
 import * as React from "react";
+import { getSiteUrl } from "@/lib/site";
 
 interface AdminReplyEmailProps {
   recipientName: string;
@@ -26,8 +27,8 @@ export const AdminReplyNotificationEmail = ({
   postUrl,
 }: AdminReplyEmailProps) => {
   
-  // 👇 1. CONFIG URL: Hardcode ke Vercel agar gambar RELIABLE
-  const baseUrl = "https://xte-port-nx-1412.vercel.app";
+  // 1. CONFIG URL: Gunakan URL produksi agar aset email tetap reliable
+  const baseUrl = getSiteUrl();
   
   // URL Logo Project Kamu (bukan placeholder lagi)
   const logoUrl = `${baseUrl}/images/logo.jpg`;

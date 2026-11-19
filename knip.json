@@ -10,8 +10,7 @@
   ],
   "ignore": [
     "src/components/ui/**",
-    "src/components/guestbook/reply-button.tsx",
-    "test-connection.ts"
+    "src/components/guestbook/reply-button.tsx"
   ],
   "ignoreDependencies": [
     "@radix-ui/react-separator",

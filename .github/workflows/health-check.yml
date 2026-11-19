@@ -32,8 +32,8 @@ jobs:
     steps:
       - name: Check live Vercel routes return 200 OK
         run: |
-          BASE_URL="https://xte-port-nx-1412.vercel.app"
-          for path in "/" "/about" "/projects" "/blog" "/guestbook"; do
+          BASE_URL="https://avin1731.xteonlyone.my.id"
+          for path in "/" "/about" "/projects" "/blog" "/guestbook" "/robots.txt" "/sitemap.xml"; do
             status=$(curl -s -o /dev/null -w "%{http_code}" -L "$BASE_URL$path")
             echo "$BASE_URL$path -> HTTP $status"
             if [ "$status" != "200" ]; then

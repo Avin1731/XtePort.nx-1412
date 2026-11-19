@@ -84,4 +84,34 @@ test.describe("Public portfolio routes", () => {
       page.getByText(/I'm Avin, a Fullstack Developer/i)
     ).toBeVisible();
   });
+
+  test("serves SEO endpoints, custom 404, and fits mobile viewport cleanly", async ({
+    page,
+    request,
+  }) => {
+    const robotsRes = await request.get("/robots.txt");
+    expect(robotsRes.status()).toBe(200);
+    expect(await robotsRes.text()).toContain("Sitemap:");
+
+    const sitemapRes = await request.get("/sitemap.xml");
+    expect(sitemapRes.status()).toBe(200);
+    const sitemapBody = await sitemapRes.text();
+    expect(sitemapBody).toContain("/projects");
+    expect(sitemapBody).toContain("/blog/automated-ci-gfm-tables");
+
+    await page.goto("/non-existent-route-phase9");
+    await expect(
+      page.getByRole("heading", { name: "Page not found" })
+    ).toBeVisible();
+    await expect(page.getByRole("link", { name: /Back to Home/i })).toBeVisible();
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    for (const route of ["/", "/about", "/projects", "/blog", "/guestbook"]) {
+      await page.goto(route);
+      const hasOverflow = await page.evaluate(
+        () => document.documentElement.scrollWidth > window.innerWidth
+      );
+      expect(hasOverflow, `Horizontal overflow detected on ${route}`).toBe(false);
+    }
+  });
 });
