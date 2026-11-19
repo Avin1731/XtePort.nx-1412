@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.3.0](https://github.com/Avin1731/XtePort.nx-1412/compare/a-1412-v0.2.1...a-1412-v0.3.0) (2026-11-19)
+
+
+### Features
+
+* **email:** add centralized Resend mail helper with replyTo support ([6a945e6](https://github.com/Avin1731/XtePort.nx-1412/commit/6a945e667928035c77aa0ba6aa889945df5963ce))
+
+
+### Bug Fixes
+
+* **email:** migrate email actions to centralized xteonlyone.my.id sender ([b834a43](https://github.com/Avin1731/XtePort.nx-1412/commit/b834a437bcc3e1bf8880a5e315886b68b350e0e4))
+* **email:** migrate Resend sender to xteonlyone.my.id with replyTo ([4413321](https://github.com/Avin1731/XtePort.nx-1412/commit/441332166cd2f5b4efa545efe8a8473d8deed496))
+
 ## [0.2.1](https://github.com/Avin1731/XtePort.nx-1412/compare/a-1412-v0.2.0...a-1412-v0.2.1) (2026-11-18)
 
 
