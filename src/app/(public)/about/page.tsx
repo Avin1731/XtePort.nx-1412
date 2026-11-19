@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { BriefcaseBusiness, ExternalLink, MapPin, UserRound } from "lucide-react";
 
@@ -14,10 +15,24 @@ function formatMonthYear(dateValue: Date | null) {
   }).format(dateValue);
 }
 
-export const metadata = {
-  title: "About - A-1412.dev",
-  description: "Get to know the profile, journey, and work experience behind A-1412.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const data = await getPublicProfileData();
+  const name = data.profile?.fullName || "Avin";
+  const headline =
+    data.profile?.headline ||
+    "Get to know the profile, journey, and work experience behind A-1412.";
+
+  return {
+    title: "About",
+    description: headline,
+    openGraph: {
+      title: `About ${name} | A-1412`,
+      description: headline,
+      url: "/about",
+      ...(data.profile?.avatarUrl ? { images: [data.profile.avatarUrl] } : {}),
+    },
+  };
+}
 
 export default async function AboutPage() {
   const data = await getPublicProfileData();
