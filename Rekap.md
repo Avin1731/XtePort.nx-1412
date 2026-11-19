@@ -293,7 +293,16 @@ Definition of Done:
 3. URL hasil pencarian dapat dibagikan dan menghasilkan state yang sama saat dibuka ulang.
 4. Empty-state dan clear filter tersedia pada kedua halaman.
 
-### Prioritas 4 (P3) - Polish and SEO Baseline (Phase 9 Awal)
+### Prioritas 4 (P3) - Polish and SEO Baseline (Phase 9)
+
+Status: Selesai (Phase 9 Implementation pada branch `feat/polish-seo`)
+
+Ringkasan hasil implementasi:
+1. Menambahkan helper konfigurasi situs `src/lib/site.ts` dan menyempurnakan Metadata API (`metadataBase`, title template, OpenGraph/Twitter cards) pada `layout.tsx`, `/about`, `/projects`, `/blog`, `/blog/[slug]`, dan `/guestbook`.
+2. Menambahkan route SEO dinamis `src/app/sitemap.ts` dan `src/app/robots.ts`.
+3. Menambahkan skeleton loading states (`loading.tsx`) pada rute publik `/about`, `/projects`, `/blog`, `/blog/[slug]`, dan `/guestbook`.
+4. Menambahkan custom `not-found.tsx` (global dan artikel `/blog/[slug]`) serta global `error.tsx` boundary dengan komponen `StatusView`.
+5. Memigrasikan URL produksi pada template email (`getSiteUrl()`) & `.github/workflows/health-check.yml` ke `https://avin1731.xteonlyone.my.id`, menyaring trigger PR bot Release Please di CI/Lighthouse, menghapus file usang `test-connection.ts`, dan menambahkan Playwright check untuk endpoint SEO, halaman 404, serta viewport mobile `390x844`.
 
 Alasan prioritas:
 1. Dikerjakan setelah konten dinamis utama selesai agar tidak kerja dua kali.
@@ -321,7 +330,7 @@ Definition of Done:
 1. Prioritas 1 (P0) sudah selesai dan terverifikasi.
 2. Prioritas 2 (P1) sudah selesai dan terverifikasi.
 3. Prioritas 3 (P2) sudah selesai dan terverifikasi.
-4. Fokus aktif berikutnya: Prioritas 4 (P3) untuk quality pass sebelum masuk fase ekspansi.
+4. Prioritas 4 (P3) telah selesai diimplementasikan di `feat/polish-seo`; langkah berikutnya adalah final merge ke `dev` -> `main` untuk rilis `v1.0.0`.
 
 Urutan ini dipilih agar perbaikan berjalan bertahap, konsisten dengan struktur codebase yang sudah ada, dan minim risiko bongkar ulang.
 

@@ -13,6 +13,7 @@ import {
   Img,
 } from "react-email";
 import * as React from "react";
+import { getSiteUrl } from "@/lib/site";
 
 interface ReplyNotificationEmailProps {
   recipientName: string;
@@ -28,9 +29,8 @@ export default function ReplyNotificationEmail({
   postUrl,
 }: ReplyNotificationEmailProps) {
   
-  // 👇 1. URL LOGO: Kita hardcode ke Vercel kamu karena file-nya SUDAH ADA di GitHub
-  // Saya cek URL ini valid: https://xte-port-nx-1412.vercel.app/images/logo.jpg
-  const baseUrl = "https://xte-port-nx-1412.vercel.app";
+  // 1. URL LOGO: Gunakan URL produksi agar gambar logo email tetap reliable
+  const baseUrl = getSiteUrl();
   const logoUrl = `${baseUrl}/images/logo.jpg`;
 
   // 👇 2. SAFE URL LOGIC

@@ -5,7 +5,7 @@ import { FadeIn } from "@/components/animation/fade-in"
 
 export function CtaSection() {
   return (
-    <section className="container py-24 px-4">
+    <section className="container mx-auto px-4 py-24">
       <FadeIn>
         <div className="relative overflow-hidden rounded-3xl bg-primary px-6 py-16 text-center text-primary-foreground shadow-2xl sm:px-16 md:py-24">
           

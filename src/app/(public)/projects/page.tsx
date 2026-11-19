@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ExternalLink, FolderOpen } from "lucide-react";
 
@@ -9,9 +10,14 @@ import { Button } from "@/components/ui/button";
 
 type PublicProject = Awaited<ReturnType<typeof getPublicProjects>>[number];
 
-export const metadata = {
-  title: "Projects - A-1412.dev",
-  description: "Explore featured and latest projects built in A-1412 portfolio.",
+export const metadata: Metadata = {
+  title: "Projects",
+  description: "Explore featured and latest projects built in the A-1412 portfolio.",
+  openGraph: {
+    title: "Projects | A-1412",
+    description: "Explore featured and latest projects built in the A-1412 portfolio.",
+    url: "/projects",
+  },
 };
 
 function parseTechStack(rawTechStack: string | null) {
