@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.1](https://github.com/Avin1731/XtePort.nx-1412/compare/a-1412-v0.4.0...a-1412-v0.4.1) (2026-11-19)
+
+
+### Bug Fixes
+
+* **ci:** package .next artifact as tarball for upload-artifact v4 ([36a74c9](https://github.com/Avin1731/XtePort.nx-1412/commit/36a74c9341241f8e99ce14be09464fe75763560c))
+
 ## [0.4.0](https://github.com/Avin1731/XtePort.nx-1412/compare/a-1412-v0.3.0...a-1412-v0.4.0) (2026-11-19)
 
 
