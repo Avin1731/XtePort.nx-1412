@@ -129,14 +129,16 @@ jobs:
           NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET: ci_preset
         run: pnpm build
 
+      - name: Package Next.js build artifact
+        if: steps.scope.outputs.has_build == 'true'
+        run: tar -czf /tmp/next-build.tar.gz --exclude=.next/cache .next
+
       - name: Upload Next.js build artifact
         if: steps.scope.outputs.has_build == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: next-build
-          path: |
-            .next
-            !.next/cache
+          path: /tmp/next-build.tar.gz
           retention-days: 1
 
       - name: Production security audit
@@ -219,7 +221,11 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: next-build
-          path: .next
+          path: /tmp
+
+      - name: Extract Next.js build artifact
+        if: needs.quality-gate.outputs.run_e2e == 'true'
+        run: tar -xzf /tmp/next-build.tar.gz
 
       - name: Push Drizzle schema to test Postgres
         if: needs.quality-gate.outputs.run_e2e == 'true'
@@ -296,7 +302,10 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: next-build
-          path: .next
+          path: /tmp
+
+      - name: Extract Next.js build artifact
+        run: tar -xzf /tmp/next-build.tar.gz
 
       - name: Push Drizzle schema to Postgres
         run: pnpm exec drizzle-kit push --force
