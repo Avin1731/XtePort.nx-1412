@@ -11,7 +11,7 @@ const technologies = [
 
 export function TechStack() {
   return (
-    <section className="container py-20 px-4">
+    <section className="container mx-auto px-4 py-20">
       <FadeIn>
         <div className="mb-10 text-center">
           <h2 className="text-3xl font-bold tracking-tight">Current Tech Stack</h2>

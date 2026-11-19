@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { getPostBySlug, getLikeStatus } from "@/actions/blog";
 import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
@@ -11,18 +12,33 @@ import { auth } from "@/auth";
 import { ViewCounter } from "@/components/dashboard/view-counter";
 import { LikeButton } from "@/components/dashboard/like-button";
 
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
-    const { slug } = await params;
-    const post = await getPostBySlug(slug);
-    if (!post) return { title: "Post Not Found" };
-    
-    return {
-        title: post.title,
-        description: post.excerpt,
-        openGraph: {
-            images: post.images.length > 0 ? [post.images[0]] : [],
-        }
-    };
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const post = await getPostBySlug(slug);
+  if (!post) return { title: "Post Not Found" };
+
+  return {
+    title: post.title,
+    description: post.excerpt,
+    openGraph: {
+      type: "article",
+      title: post.title,
+      description: post.excerpt,
+      url: `/blog/${post.slug}`,
+      publishedTime: new Date(post.createdAt).toISOString(),
+      ...(post.images.length > 0 ? { images: [post.images[0]] } : {}),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description: post.excerpt,
+      ...(post.images.length > 0 ? { images: [post.images[0]] } : {}),
+    },
+  };
 }
 
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {

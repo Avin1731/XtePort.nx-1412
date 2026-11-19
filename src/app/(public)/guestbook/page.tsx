@@ -15,8 +15,13 @@ import { MessageCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"; // ✅ Tambahkan ini jika ada
 
 export const metadata: Metadata = {
-  title: "Guestbook | A-1412",
-  description: "Join the discussion forum.",
+  title: "Guestbook",
+  description: "Leave a note, ask questions, or join the discussion on A-1412 Guestbook.",
+  openGraph: {
+    title: "Guestbook | A-1412",
+    description: "Leave a note, ask questions, or join the discussion on A-1412 Guestbook.",
+    url: "/guestbook",
+  },
 };
 
 // --- CONSTANTS & HELPERS ---

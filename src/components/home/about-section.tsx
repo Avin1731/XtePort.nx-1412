@@ -20,8 +20,8 @@ export async function AboutSection() {
     "I believe in building software that is not only functional but also intuitive and delightful to use. Currently focused on mastering the Next.js ecosystem and exploring System Architecture.";
 
   return (
-    <section className="bg-muted/30 py-20">
-      <div className="container px-4">
+    <section className="overflow-x-hidden bg-muted/30 py-20">
+      <div className="container mx-auto px-4">
         <div className="flex flex-col gap-10 md:flex-row md:items-center">
           {/* Kiri: Teks */}
           <div className="flex-1">

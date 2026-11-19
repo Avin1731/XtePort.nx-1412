@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { getPublishedPosts } from "@/actions/blog";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
@@ -8,9 +9,14 @@ import { auth } from "@/auth";
 import { LikeButton } from "@/components/dashboard/like-button"; 
 import { ContentSearchForm } from "@/components/search/content-search-form";
 
-export const metadata = {
-  title: "Blog - My Awesome Project",
-  description: "Read our latest articles and tutorials.",
+export const metadata: Metadata = {
+  title: "Blog",
+  description: "Read technical articles, engineering notes, and tutorials on web development.",
+  openGraph: {
+    title: "Blog | A-1412",
+    description: "Read technical articles, engineering notes, and tutorials on web development.",
+    url: "/blog",
+  },
 };
 
 function buildBlogHref({
