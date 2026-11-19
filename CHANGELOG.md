@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.4.0](https://github.com/Avin1731/XtePort.nx-1412/compare/a-1412-v0.3.0...a-1412-v0.4.0) (2026-11-19)
+
+
+### Features
+
+* **polish:** implement Phase 9 SEO, skeletons, error boundaries, and mobile checks ([8a4c442](https://github.com/Avin1731/XtePort.nx-1412/commit/8a4c4420317d415c4aad437bc09520122d65219b))
+* **release:** promote Phase 9 polish, SEO, and production domain updates to main ([35ff1cb](https://github.com/Avin1731/XtePort.nx-1412/commit/35ff1cbf2829a71bcec024bce5dbba9ec483ff94))
+* **seo:** add dynamic metadata, sitemap, and robots config ([f278563](https://github.com/Avin1731/XtePort.nx-1412/commit/f2785630babddb4efdc35deaeef1ccefe865d90b))
+* **ui:** add custom not-found and error boundary pages ([fba1840](https://github.com/Avin1731/XtePort.nx-1412/commit/fba18408c744447e68ba72e4faaf2de85665655f))
+* **ui:** add skeleton loading states for public routes ([7d8b4ac](https://github.com/Avin1731/XtePort.nx-1412/commit/7d8b4ac5fef454b117f0a19c07981186ccd3c115))
+
+
+### Bug Fixes
+
+* **ui:** prevent mobile horizontal overflow on home sections ([6de21d5](https://github.com/Avin1731/XtePort.nx-1412/commit/6de21d5a477a02f6a002766f4ac341a67b057658))
+
 ## [0.3.0](https://github.com/Avin1731/XtePort.nx-1412/compare/a-1412-v0.2.1...a-1412-v0.3.0) (2026-11-19)
 
 
