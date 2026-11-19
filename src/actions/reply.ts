@@ -1,6 +1,6 @@
 "use server";
 
-import { Resend } from "resend";
+import { sendEmail } from "@/lib/mail";
 import { db } from "@/lib/db";
 import { messages, users } from "@/db/schema";
 import { eq } from "drizzle-orm";
@@ -14,9 +14,6 @@ export async function sendReply(messageId: string, replyContent: string) {
   if (session?.user?.email !== process.env.ADMIN_EMAIL) {
     return { success: false, error: "Unauthorized access" };
   }
-
-  // Instance baru dibuat hanya saat fungsi dipanggil, bukan saat build.
-  const resend = new Resend(process.env.RESEND_API_KEY);
 
   try {
     // 2. Ambil detail pesan
@@ -38,8 +35,8 @@ export async function sendReply(messageId: string, replyContent: string) {
     }
 
     // 3. Kirim Email
-    await resend.emails.send({
-      from: "Admin A-1412 <onboarding@resend.dev>", 
+    const emailResult = await sendEmail({
+      fromName: "Admin A-1412",
       to: data.userEmail,
       subject: "Reply to your message on A-1412.dev",
       html: `
@@ -61,6 +58,10 @@ export async function sendReply(messageId: string, replyContent: string) {
         </div>
       `,
     });
+
+    if (!emailResult.success) {
+      return { success: false, error: emailResult.error };
+    }
 
     return { success: true };
   } catch (error) {

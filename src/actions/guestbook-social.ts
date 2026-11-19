@@ -12,11 +12,8 @@ import {
 } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { Resend } from "resend"; 
+import { sendEmail } from "@/lib/mail";
 import ReplyNotificationEmail from "@/components/emails/reply-notification";
-
-// Inisialisasi Resend
-const resend = new Resend(process.env.RESEND_API_KEY);
 
 /**
  * TOGGLE LIKE POSTINGAN UTAMA
@@ -152,11 +149,11 @@ export async function submitReply(
       });
 
       // Email notification
-      if (targetEmail && process.env.RESEND_API_KEY) {
+      if (targetEmail) {
         try {
-          await resend.emails.send({
-            from: "Guestbook A-1412 <noreply@xteonlyone1412.my.id>", 
-            to: targetEmail, 
+          const result = await sendEmail({
+            fromName: "Guestbook A-1412",
+            to: targetEmail,
             subject: replyToId ? "💬 Someone replied to your comment" : "💬 New reply on your Guestbook post",
             react: ReplyNotificationEmail({
               recipientName: targetName,
@@ -165,7 +162,9 @@ export async function submitReply(
               postUrl: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/guestbook`,
             }),
           });
-          console.log(`✅ Email sent to ${targetEmail}`);
+          if (result.success) {
+            console.log(`✅ Email sent to ${targetEmail}`);
+          }
         } catch (emailError) {
           console.error("❌ Failed to send email:", emailError);
         }
