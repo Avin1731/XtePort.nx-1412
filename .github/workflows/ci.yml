@@ -5,9 +5,7 @@ on:
     branches:
       - dev
       - main
-  push:
-    branches:
-      - dev
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -18,38 +16,107 @@ jobs:
     name: Quality Gate (Type, Lint, Build, Audit)
     if: github.event_name != 'pull_request' || github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      run_code: ${{ steps.scope.outputs.run_code }}
+      run_ui: ${{ steps.scope.outputs.run_ui }}
+      run_e2e: ${{ steps.scope.outputs.run_e2e }}
+      has_build: ${{ steps.scope.outputs.has_build }}
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Detect changed paths
+        if: github.event_name == 'pull_request'
+        id: changes
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            code:
+              - '**'
+              - '!**/*.md'
+              - '!.github/workflows/health-check.yml'
+              - '!.github/workflows/pr-lint.yml'
+              - '!.github/workflows/release.yml'
+              - '!CHANGELOG.md'
+              - '!renovate.json'
+              - '!release-please-config.json'
+              - '!.release-please-manifest.json'
+            ui:
+              - 'src/app/**'
+              - 'src/components/**'
+              - 'src/lib/**'
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+              - 'lighthouserc.json'
+              - 'next.config.ts'
+
+      - name: Resolve execution scope
+        id: scope
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "run_code=true" >> "$GITHUB_OUTPUT"
+            echo "run_ui=true" >> "$GITHUB_OUTPUT"
+            echo "run_e2e=true" >> "$GITHUB_OUTPUT"
+            echo "has_build=true" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.base_ref }}" = "main" ] && [ "${{ github.head_ref }}" = "dev" ]; then
+            echo "Skipping full CI re-run for dev -> main promotion (already verified on dev)."
+            echo "run_code=false" >> "$GITHUB_OUTPUT"
+            echo "run_ui=false" >> "$GITHUB_OUTPUT"
+            echo "run_e2e=false" >> "$GITHUB_OUTPUT"
+            echo "has_build=false" >> "$GITHUB_OUTPUT"
+          elif [ "${{ steps.changes.outputs.code }}" = "true" ]; then
+            echo "run_code=true" >> "$GITHUB_OUTPUT"
+            echo "run_ui=${{ steps.changes.outputs.ui }}" >> "$GITHUB_OUTPUT"
+            echo "run_e2e=true" >> "$GITHUB_OUTPUT"
+            echo "has_build=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Skipping code checks for docs/config-only PR."
+            echo "run_code=false" >> "$GITHUB_OUTPUT"
+            echo "run_ui=false" >> "$GITHUB_OUTPUT"
+            echo "run_e2e=false" >> "$GITHUB_OUTPUT"
+            echo "has_build=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Setup pnpm
+        if: steps.scope.outputs.run_code == 'true'
         uses: pnpm/action-setup@v4
 
       - name: Setup Node.js
+        if: steps.scope.outputs.run_code == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: "22"
           cache: "pnpm"
 
       - name: Install dependencies
+        if: steps.scope.outputs.run_code == 'true'
         run: pnpm install --frozen-lockfile
 
       - name: TypeScript check
+        if: steps.scope.outputs.run_code == 'true'
         run: pnpm exec tsc --noEmit
 
       - name: ESLint check
+        if: steps.scope.outputs.run_code == 'true'
         run: pnpm lint
 
       - name: Dead code & unused dependencies check
+        if: steps.scope.outputs.run_code == 'true'
         run: pnpm check:unused
 
       - name: Drizzle schema integrity check
+        if: steps.scope.outputs.run_code == 'true'
         env:
           DATABASE_URL: postgresql://ci_user:ci_pass@ep-ci-placeholder.us-east-2.aws.neon.tech/neondb?sslmode=require
         run: pnpm exec drizzle-kit check
 
       - name: Production build check
+        if: steps.scope.outputs.has_build == 'true'
         env:
           DATABASE_URL: postgresql://ci_user:ci_pass@ep-ci-placeholder.us-east-2.aws.neon.tech/neondb?sslmode=require
           AUTH_SECRET: ci_placeholder_secret_for_build_only_32chars
@@ -57,12 +124,23 @@ jobs:
           AUTH_GOOGLE_SECRET: ci_google_secret
           ADMIN_EMAIL: admin@example.com
           RESEND_API_KEY: re_ci_placeholder_key
-          NEXT_PUBLIC_APP_URL: http://localhost:3000
+          NEXT_PUBLIC_APP_URL: http://127.0.0.1:3000
           NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: ci_cloud
           NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET: ci_preset
         run: pnpm build
 
+      - name: Upload Next.js build artifact
+        if: steps.scope.outputs.has_build == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: next-build
+          path: |
+            .next
+            !.next/cache
+          retention-days: 1
+
       - name: Production security audit
+        if: steps.scope.outputs.run_code == 'true'
         run: pnpm audit --prod --audit-level=critical
 
   e2e:
@@ -102,6 +180,103 @@ jobs:
       NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET: ci_preset
 
     steps:
+      - name: Skip E2E notice
+        if: needs.quality-gate.outputs.run_e2e != 'true'
+        run: echo "Playwright E2E skipped (docs-only PR or dev -> main promotion already verified)."
+
+      - name: Checkout repository
+        if: needs.quality-gate.outputs.run_e2e == 'true'
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        if: needs.quality-gate.outputs.run_e2e == 'true'
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        if: needs.quality-gate.outputs.run_e2e == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        if: needs.quality-gate.outputs.run_e2e == 'true'
+        run: pnpm install --frozen-lockfile
+
+      - name: Cache Playwright browsers
+        if: needs.quality-gate.outputs.run_e2e == 'true'
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: Install Playwright Chromium
+        if: needs.quality-gate.outputs.run_e2e == 'true'
+        run: pnpm exec playwright install chromium --with-deps
+
+      - name: Download Next.js build artifact
+        if: needs.quality-gate.outputs.run_e2e == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: next-build
+          path: .next
+
+      - name: Push Drizzle schema to test Postgres
+        if: needs.quality-gate.outputs.run_e2e == 'true'
+        run: pnpm exec drizzle-kit push --force
+
+      - name: Seed E2E test data
+        if: needs.quality-gate.outputs.run_e2e == 'true'
+        run: pnpm exec tsx scripts/seed-test.ts
+
+      - name: Run Playwright E2E tests
+        if: needs.quality-gate.outputs.run_e2e == 'true'
+        run: pnpm test:e2e
+
+      - name: Upload Playwright report on failure
+        if: failure() && needs.quality-gate.outputs.run_e2e == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+  lighthouse:
+    name: Lighthouse Audit (Perf, A11y, SEO)
+    runs-on: ubuntu-latest
+    needs: quality-gate
+    if: needs.quality-gate.outputs.run_ui == 'true'
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: a1412_lhci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/a1412_lhci
+      USE_LOCAL_PG: "1"
+      AUTH_SECRET: ci_lhci_nextauth_secret_32_characters_min
+      AUTH_URL: http://127.0.0.1:3000
+      AUTH_TRUST_HOST: "true"
+      AUTH_GOOGLE_ID: ci_google_id
+      AUTH_GOOGLE_SECRET: ci_google_secret
+      ADMIN_EMAIL: admin@example.com
+      RESEND_API_KEY: re_ci_placeholder_key
+      NEXT_PUBLIC_APP_URL: http://127.0.0.1:3000
+      NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: ci_cloud
+      NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET: ci_preset
+
+    steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -117,25 +292,21 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Install Playwright Chromium
-        run: pnpm exec playwright install chromium --with-deps
+      - name: Download Next.js build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: next-build
+          path: .next
 
-      - name: Push Drizzle schema to test Postgres
+      - name: Push Drizzle schema to Postgres
         run: pnpm exec drizzle-kit push --force
 
-      - name: Seed E2E test data
+      - name: Seed sample data
         run: pnpm exec tsx scripts/seed-test.ts
 
-      - name: Build application for E2E
-        run: pnpm build
-
-      - name: Run Playwright E2E tests
-        run: pnpm test:e2e
-
-      - name: Upload Playwright report on failure
-        if: failure()
-        uses: actions/upload-artifact@v4
+      - name: Run Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v12
         with:
-          name: playwright-report
-          path: playwright-report/
-          retention-days: 7
+          configPath: ./lighthouserc.json
+          uploadArtifacts: true
+          temporaryPublicStorage: true
