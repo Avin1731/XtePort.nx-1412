@@ -11,10 +11,8 @@ import {
 } from "@/db/schema";
 import { eq, desc, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { Resend } from "resend"; 
-import AdminReplyNotificationEmail from "@/components/emails/admin-reply-notification"; 
-
-const resend = new Resend(process.env.RESEND_API_KEY);
+import { sendEmail } from "@/lib/mail";
+import AdminReplyNotificationEmail from "@/components/emails/admin-reply-notification";
 
 // Helper: Cek Admin
 async function checkAdmin() {
@@ -117,9 +115,9 @@ export async function submitAdminReply(guestbookId: string, content: string) {
                 where: eq(users.id, targetUserId),
             });
 
-            if (targetUser?.email && process.env.RESEND_API_KEY) {
-                await resend.emails.send({
-                    from: "Admin A-1412 <noreply@xteonlyone1412.my.id>", 
+            if (targetUser?.email) {
+                await sendEmail({
+                    fromName: "Admin A-1412",
                     to: targetUser.email,
                     subject: "🔔 Official Admin Response",
                     react: AdminReplyNotificationEmail({
